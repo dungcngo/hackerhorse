@@ -1,9 +1,81 @@
-Mission
-	The user luna has left her password in a file inside the muack
-	folder. 
-Method of solving
-	search for a file under a specific directory
-Key command
-	find muack -type f | xargs file
+# 0x06
+This write-up explains the steps taken to complete mission 0x06, starting from user `camila` and escalating to `luna`.
+
+## Mission
+As always, read the objective first:
+```bash
+camila@venus:~$ cat mission.txt 
+################
+# MISSION 0x06 #
+################
+
+## EN ##
+The user luna has left her password in a file inside the muack folder.
+```
+
+## Method of solving
+The `muack` folder is in home directory, when we look into it, there are so many folders inside.
+```bash
+camila@venus:~$ ls ./muack/
+1    129  159  189  218  248  278  307  337  367  397  426  456  486  515  545  80
+10   13   16   19   219  249  279  308  338  368  398  427  457  487  516  546  81
+100  130  160  190  22   25   28   309  339  369  399  428  458  488  517  547  82
+101  131  161  191  220  250  280  31   34   37   4    429  459  489  518  548  83
+102  132  162  192  221  251  281  310  340  370  40   43   46   49   519  549  84
+103  133  163  193  222  252  282  311  341  371  400  430  460  490  52   55   85
+104  134  164  194  223  253  283  312  342  372  401  431  461  491  520  56   86
+105  135  165  195  224  254  284  313  343  373  402  432  462  492  521  57   87
+106  136  166  196  225  255  285  314  344  374  403  433  463  493  522  58   88
+107  137  167  197  226  256  286  315  345  375  404  434  464  494  523  59   89
+108  138  168  198  227  257  287  316  346  376  405  435  465  495  524  6    9
+109  139  169  199  228  258  288  317  347  377  406  436  466  496  525  60   90
+11   14   17   2    229  259  289  318  348  378  407  437  467  497  526  61   91
+110  140  170  20   23   26   29   319  349  379  408  438  468  498  527  62   92
+111  141  171  200  230  260  290  32   35   38   409  439  469  499  528  63   93
+112  142  172  201  231  261  291  320  350  380  41   44   47   5    529  64   94
+113  143  173  202  232  262  292  321  351  381  410  440  470  50   53   65   95
+114  144  174  203  233  263  293  322  352  382  411  441  471  500  530  66   96
+115  145  175  204  234  264  294  323  353  383  412  442  472  501  531  67   97
+116  146  176  205  235  265  295  324  354  384  413  443  473  502  532  68   98
+117  147  177  206  236  266  296  325  355  385  414  444  474  503  533  69   99
+118  148  178  207  237  267  297  326  356  386  415  445  475  504  534  7
+119  149  179  208  238  268  298  327  357  387  416  446  476  505  535  70
+12   15   18   209  239  269  299  328  358  388  417  447  477  506  536  71
+120  150  180  21   24   27   3    329  359  389  418  448  478  507  537  72
+121  151  181  210  240  270  30   33   36   39   419  449  479  508  538  73
+122  152  182  211  241  271  300  330  360  390  42   45   48   509  539  74
+123  153  183  212  242  272  301  331  361  391  420  450  480  51   54   75
+124  154  184  213  243  273  302  332  362  392  421  451  481  510  540  76
+125  155  185  214  244  274  303  333  363  393  422  452  482  511  541  77
+126  156  186  215  245  275  304  334  364  394  423  453  483  512  542  78
+127  157  187  216  246  276  305  335  365  395  424  454  484  513  543  79
+128  158  188  217  247  277  306  336  366  396  425  455  485  514  544  8
+```
+It's not recommend to check each folder one by one.
+So, the easiest way is to seach for any file inside `muack` directory:
+```bash
+camila@venus:~$ find ./muack/ -type f 2>/dev/null
+./muack/111/111/muack
+```
+There is one file, read that file:
+```bash
+camila@venus:~$ cat ./muack/111/111/muack 
+j3vkuoKQwvbhkMc
+```
+After retrieving the password, verify it:
+```bash
+camila@venus:~$ su - luna
+Password: 
+GOGETA SSJ5 
+luna@venus:~$ id ; whoami
+uid=1007(luna) gid=1007(luna) groups=1007(luna)
+luna
+```
+Successfully logged in as `luna`. Now get the flag.
+
+## Key command
+`find muack -type f | xargs file`
+
+***You are welcome!***
 	
 	
