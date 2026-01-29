@@ -187,7 +187,8 @@ admin
 ```
 ### Privilege Escalation
 #### Enumeration
-***Writable Files***
+**Writable Files**
+
 Enumerate all regular files on the system that the user has write permissions for.
 ```bash
 admin@doctor:~$ find / -writable -type f 2>/dev/null | grep -viE "var|proc|sys|home"
