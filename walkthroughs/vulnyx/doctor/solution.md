@@ -2,7 +2,7 @@
 Doctor is a vulnerable Linux virtual machine of low difficuty from VulNyx platform, create by the user m0w and works correctly in the VirtualBox and VMware hypervisors.
 ## Solution
 ### Enumeration
-Use Nmap to scan the ports on the Doctor's IP address
+Use Nmap to scan the ports on the Doctor's IP address.
 ```bash
 ┌──(dungcngo㉿kali)-[~]
 └─$ nmap -n -Pn -sS -p- --min-rate 5000 192.168.100.105
@@ -187,8 +187,6 @@ admin
 ```
 ### Privilege Escalation
 #### Enumeration
-**Writable Files**
-
 Enumerate all regular files on the system that the user has write permissions for.
 ```bash
 admin@doctor:~$ find / -writable -type f 2>/dev/null | grep -viE "var|proc|sys|home"
