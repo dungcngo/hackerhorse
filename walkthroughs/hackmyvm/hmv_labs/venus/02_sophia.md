@@ -25,7 +25,7 @@ The user angela has saved her password in a file but she does not remember where
 ```
 basically, our objective is to find a file called `whereismypazz.txt`.
 	
-## Method of solve
+## Method of solving
 Since we don't know where the file is, using `find` command will be really helpful in this case.
 ```bash
 sophia@venus:~$ find / -type f -name "whereismypazz.txt" 2>/dev/null
