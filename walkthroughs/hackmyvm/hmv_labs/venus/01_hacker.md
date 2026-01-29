@@ -1,5 +1,5 @@
 # 0x01
-This write-up walks through how mission 0x01 on venus@hackmyvm.eu was completed moving from the `hacker` user to `sophia`.
+This write-up explains the steps taken to complete mission 0x01 on venus@hackmyvm.eu, starting from user `hacker` and escalating to `sophia`.
 
 ## Mission
 First, SSH into the target machine using  the provided `hacker` credentials (see https://hackmyvm.eu/venus/index.php):

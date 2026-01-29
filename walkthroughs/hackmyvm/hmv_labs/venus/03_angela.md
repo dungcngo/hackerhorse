@@ -1,5 +1,5 @@
 # 0x03
-This write-up walks through how mission 0x03 was completed, moving from user `angela` to `emma`.
+This write-up explains the steps taken to complete mission 0x03, starting from user `angela` and escalating to `emma`.
 
 ## Mission
 As usual, read the objective:

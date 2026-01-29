@@ -1,5 +1,5 @@
 # 0x02
-This write-up walks through how mission 0x02 was completed, moving from user `sophia` to `angela`.
+This write-up explains the steps taken to complete mission 0x02, starting from user `sophia` and escalating to `angela`.
 
 ## Mission
 In the home directory, read the `mission.txt`:
