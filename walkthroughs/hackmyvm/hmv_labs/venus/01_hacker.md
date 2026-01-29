@@ -51,6 +51,6 @@ sophia@venus:~$ cat flagz.txt
 ```
 
 ## Key command
-	`ls -la`
+`ls -la`
 	
 ***You are welcome!***
