@@ -49,6 +49,7 @@ WKINVzNQLKLDVAc
 
 ## Key command
 `sed -n 's/^a9HFX//p' passy`
+
 `grep "a9HFX" passy`
 
 ***You are welcome!***
