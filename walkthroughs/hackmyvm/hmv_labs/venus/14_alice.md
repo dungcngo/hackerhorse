@@ -26,6 +26,15 @@ We can read the password with that command:
 alice@venus:~$ cut -d: -f1,5 /etc/passwd | grep "alice"
 alice:w8NvY27qkpdePox
 ```
+Verify it by switching user to `anna`:
+```bash
+alice@venus:~$ su - anna
+Password: 
+GOGETA SSJ11 |e[0m
+anna@venus:~$ id ; whoami
+uid=1015(anna) gid=1015(anna) groups=1015(anna)
+anna
+```
 
 ## Key command
 `cat /etc/passwd | grep "alice"`
