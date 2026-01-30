@@ -1,5 +1,5 @@
 # 0x08
-This write-up explains the steps taken to complete mission 0x07, starting from user `eleanor` and escalating to `victoria`.
+This write-up explains the steps taken to complete mission 0x08, starting from user `eleanor` and escalating to `victoria`.
 
 ## Mission
 As always, read the objective first:
