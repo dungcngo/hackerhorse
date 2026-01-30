@@ -1,5 +1,5 @@
 # 0x11
-This write-up explains the steps taken to complete mission 0x10, starting from user `violet` and escalating to `lucy`.
+This write-up explains the steps taken to complete mission 0x11, starting from user `violet` and escalating to `lucy`.
 
 ## Mission
 As usual, read the mission first:
