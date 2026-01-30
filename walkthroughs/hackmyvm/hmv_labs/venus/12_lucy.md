@@ -1,5 +1,5 @@
 # 0x12
-This write-up explains the steps taken to complete mission 0x10, starting from user `lucy` and escalating to `elena`.
+This write-up explains the steps taken to complete mission 0x12, starting from user `lucy` and escalating to `elena`.
 
 ## Mission
 As usual, read the objective first:
