@@ -46,6 +46,16 @@ Or, we can use `sed` so that only lines starting with `a9HFX` are processed, the
 isla@venus:~$ sed -n 's/^a9HFX//p' passy
 WKINVzNQLKLDVAc
 ```
+Verify it by switching to user `violet` and read the flag:
+```bash
+isla@venus:~$ su - violet
+Password: 
+GOGETA SSJ7 
+el que te afirma tornillo
+violet@venus:~$ id ; whoami
+uid=1011(violet) gid=1011(violet) groups=1011(violet)
+violet
+```
 
 ## Key command
 `sed -n 's/^a9HFX//p' passy`
