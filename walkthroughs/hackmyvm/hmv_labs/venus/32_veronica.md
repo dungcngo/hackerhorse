@@ -1,5 +1,5 @@
 # 0x32
-This write-up explains the steps taken to complete mission 0x31, starting from user `veronica` and escalating to `lana`.
+This write-up explains the steps taken to complete mission 0x32, starting from user `veronica` and escalating to `lana`.
 
 ## Mission
 ```bash
