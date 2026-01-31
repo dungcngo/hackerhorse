@@ -1,4 +1,4 @@
-# 0x28
+# 0x29
 This write-up explains the steps taken to complete mission 0x29, starting from user `celeste` and escalating to `nina`.
 
 ## Mission
