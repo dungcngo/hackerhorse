@@ -1,5 +1,5 @@
 # 0x38
-This write-up explains the steps taken to complete mission 0x36, starting from user `julie` and escalating to `irene`.
+This write-up explains the steps taken to complete mission 0x38, starting from user `julie` and escalating to `irene`.
 
 ## Mission 
 The mission for this stage provided a cryptic clue:
