@@ -1,5 +1,5 @@
 # 0x37
-This write-up explains the steps taken to complete mission 0x36, starting from user `alora` and escalating to `julie`.
+This write-up explains the steps taken to complete mission 0x37, starting from user `alora` and escalating to `julie`.
 
 ## Mission 
 As usual, read the mission first:
