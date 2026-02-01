@@ -1,5 +1,5 @@
 # 0x34
-This write-up explains the steps taken to complete mission 0x33, starting from user `noa` and escalating to `maia`.
+This write-up explains the steps taken to complete mission 0x34, starting from user `noa` and escalating to `maia`.
 
 ## Mission 
 As usual, read the objective first:
