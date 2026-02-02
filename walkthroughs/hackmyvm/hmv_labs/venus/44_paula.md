@@ -1,5 +1,5 @@
 # 0x44
-This write-up explains the steps taken to complete mission 0x43, starting from user `mercy` and escalating to `paula`.
+This write-up explains the steps taken to complete mission 0x44, starting from user `paula` and escalating to `karla`.
 
 ## Mission
 As always, we read the objective first:
