@@ -35,6 +35,14 @@ doas (denise@venus) password:
 zora@venus:/pwned/denise$ id
 uid=1047(zora) gid=1047(zora) groups=1047(zora)
 ```
+We can find `zora`'s pasword.
+```bash
+zora@venus:/pwned/denise$ cd 
+zora@venus:~$ ls            
+flagz.txt  mission.txt  zora_pass.txt
+zora@venus:~$ cat zora_pass.txt 
+BWm1R3jCcb53riO
+```
 
 ## Key command
 `doas -su zora`
