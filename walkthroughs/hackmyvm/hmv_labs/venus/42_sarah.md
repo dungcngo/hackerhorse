@@ -44,3 +44,5 @@ mercy
 ## Key command
 `ls -la`
 `cat ...`
+
+***You are welcome!***
