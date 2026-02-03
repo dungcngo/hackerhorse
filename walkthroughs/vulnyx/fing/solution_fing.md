@@ -56,6 +56,7 @@ The victim host at 192.168.1.43 is running:
 ### Shell 
 #### 79/TCP (FINGER)
 **Use Brute-Force**
+hehee
 
 
 
