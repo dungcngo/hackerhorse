@@ -78,7 +78,9 @@ drwxr-xr-x 1 root    root     4096 Apr  5  2024 ..
 ```
 ## Key command
 `find / -name "*gift*" 2>/dev/null`
+
 `find / -type f -user "acantha" 2>/dev/null`
+
 `cat /pazz/acantha_pass.txt`
 
 ***You are welcome!***
