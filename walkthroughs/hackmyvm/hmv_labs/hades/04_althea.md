@@ -48,15 +48,21 @@ Enter file to check:
 flagz.txt;/bin/bash
 -rw-r----- 1 root althea 22 Apr  5  2024 flagz.txt
 ```
-The result of that command shows that we successfully logged in as the user `andromeda`.
+The result shows that we are able to read the file containing the password of user `andromeda`.
 ```bash
 andromeda@hades:~$ cat andromeda_pass.txt 
 OTWGTbHzrxhYFSTlKcOt                <----- This is the retrieved password.
+```
+With the identified password, we switched to user `andromeda` by SSH and get the flag.
+```bash
+althea@hades:~$ ssh andromeda@localhost
+...
+andromeda@localhost's password: 
+...
 andromeda@hades:~$ id ; whoami
-uid=2046(andromeda) gid=2045(althea) groups=2045(althea)
+uid=2046(andromeda) gid=2046(andromeda) groups=2046(andromeda)
 andromeda
 ```
-With the identified password, we switched to user `andromeda` and get the flag.
 
 ## Key command
 `./lsme`
