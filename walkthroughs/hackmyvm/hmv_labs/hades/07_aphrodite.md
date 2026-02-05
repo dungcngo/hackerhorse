@@ -1,5 +1,5 @@
 # 0x07
-This write-up explains the steps taken to complete mission 0x06 on hades@hackmyvm.eu, starting from user `aphrodite` and escalating to `ariadne`.
+This write-up explains the steps taken to complete mission 0x07 on hades@hackmyvm.eu, starting from user `aphrodite` and escalating to `ariadne`.
 
 ## Mission
 As always, read the objective first:
