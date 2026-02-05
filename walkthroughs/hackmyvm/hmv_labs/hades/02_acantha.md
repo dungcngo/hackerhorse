@@ -1,5 +1,5 @@
 # 0x02
-This write-up explains the steps taken to complete mission 0x01 on hades@hackmyvm.eu, starting from user `acantha` and escalating to `alala`.
+This write-up explains the steps taken to complete mission 0x02 on hades@hackmyvm.eu, starting from user `acantha` and escalating to `alala`.
 
 ## Mission
 As always, we read the mission first:
