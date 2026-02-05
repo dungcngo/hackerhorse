@@ -58,6 +58,7 @@ DESCRIPTION
  Manual page man(1) line 1 (press h for help or q to quit) (Type :e)
  
 Examine: cat althea_pass.txt (Press Enter)
+ObxEmwisYjERrDfvSbdA
 ~
 ~
 ~
@@ -68,6 +69,18 @@ Manual page man(1) line 1/1 (END) (press h for help or q to quit)
 - **SUID (Set User ID):** The S in the owner's permission field (-rwS--s---) means this program runs with the authority of the file's owner (root) or a designated user .
 - **SGID (Set Group ID):** The s in the group's permission field allows the program to run with the privileges of the group alala.
 - **Privilege Escalation:** In this specific challenge, the read binary was likely configured to read the althea_pass.txt file which was otherwise inaccessible to the alala user. By executing the binary, it used its elevated permissions to display the contents of the password file directly to the terminal.
+
+With the retrieved password, we switched to user `althea` and get the flag.
+```bash
+alala@hades:~$ ssh althea@localhost
+The authenticity of host 'localhost (::1)' can't be established.
+...
+althea@localhost's password: 
+...
+althea@hades:~$ id ; whoami
+uid=2045(althea) gid=2045(althea) groups=2045(althea)
+althea
+```
 ## Key command
 `./read`
 
