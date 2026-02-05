@@ -1,5 +1,5 @@
 # 0x03
-This write-up explains the steps taken to complete mission 0x01 on hades@hackmyvm.eu, starting from user `alala` and escalating to `althea`.
+This write-up explains the steps taken to complete mission 0x03 on hades@hackmyvm.eu, starting from user `alala` and escalating to `althea`.
 
 ## Mission
 As usual, we read the objective first:
