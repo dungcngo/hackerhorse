@@ -59,7 +59,7 @@ arete
 
 ## Key command
 `find / -name "*arete_pass*" 2>/dev/null`
-`sudo -u arete /bin/cp /run/lock/arete_pass.txt /dev/stdout`
 
+`sudo -u arete /bin/cp /run/lock/arete_pass.txt /dev/stdout`
 
 ***You are welcome!***
