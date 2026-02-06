@@ -1,5 +1,5 @@
 # 0x08
-This write-up explains the steps taken to complete mission 0x08 on hades@hackmyvm.eu, starting from user `ariadne` and escalating to ``.
+This write-up explains the steps taken to complete mission 0x08 on hades@hackmyvm.eu, starting from user `ariadne` and escalating to `arete`.
 
 ## Mission
 As usual, we read the mission:
