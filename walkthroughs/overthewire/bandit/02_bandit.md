@@ -3,7 +3,7 @@
 ## Level Description
 The goal for this level was to find the password for the next level, which was hidden in a file named `-` in the home directory. The tricky part was dealing with the filename, `-` can confuse commands into thinking it's an option or flag. Once we had the password, we needed to log into `bandit2` using SSH on port `2220`.
 
-## The Process
+## Method of Solving
 After logging into the servers as `bandit1`, we immediately listed the contents of the home directory.
 ```bash
 bandit1@bandit:~$ ls -la
