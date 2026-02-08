@@ -3,7 +3,7 @@
 ## Level Description
 The task of this level was straighforward: we needed to find the password for the user `bandit1`. The hint said the password was stored in a file named `readme` located in the home directory. Once we found it, we had to use the password to log into the user `bandit1`, using SSH like always on port `2220`.
 
-## The Process
+## Method of Solving
 After successfully logging into the server as `bandit0`, we typed `ls` to list the files in the current directory, and sure enough, there was the `readme` file.
 Next, we used the `cat` command to peek inside the file:
 ```bash
