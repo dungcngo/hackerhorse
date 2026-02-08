@@ -2,11 +2,13 @@
 
 ## Information
 **Shock** is a low-difficulty vulnerable Linux virtual machine from VulNyx platform, created by the user `m0w`, and it runs properly on VirtualBox.
+
 The **Shellshock** vulnerability (2014) affects Bash in CGI, allowing an attacker to execute arbitrary commands via HTTP headers.
 
 ## Solution
 ### Enumeration
-**Nmap**/TCP
+**Nmap**/TCP:
+
 Use Nmap to scan the ports on the Shock's IP address (192.168.100.243).
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -101,6 +103,7 @@ Finished
 ===============================================================
 ```
 The `/cgi-bin` path is a directory reserved by the web server to store CGI scripts that are not supported by standard HTML. 
+
 Scripts in `/cgi-bin` can perform functions that plain HTML cannot, such as handling forms, querying databases, and executing system commands. HTML only displays content, whereas CGI scripts generate dynamic output.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -197,7 +200,7 @@ in the server error log.</p>
 ```
 We saw an **500 Internal Server Error**, meaning the web server attempted to run `shell.sh` as a CGI script but failed to an internal error. But this confirms that the server supports CGI scripts, although this particular script is not functioning correctly.
 
-####Shellshock (CVE-2014-6271)
+#### Shellshock (CVE-2014-6271)
 **RCE (Remote Code Execution)**
 We attempted to exploit the **Shellshock** vulnerability through the CGI script `shell.sh` by sending a payload in the `User-Agent` header to force the server to execute the `id` command.
 ```bash
