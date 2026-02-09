@@ -23,7 +23,7 @@ VGhlIHBhc3N3b3JkIGlzIGR0UjE3M2ZaS2IwUlJzREZTR3NnMlJXbnBOVmozcVJyCg==
 ```
 It returns a string with `base64` encoded data. We could use the `base64` command to encode or decode.
 
-We could use `-d` option with the file naem as an argument to solve this challenge.
+We could use `-d` option with the file name as an argument to solve this challenge.
 ```bash
 bandit10@bandit:~$ base64 -d data.txt 
 The password is dtR173fZKb0RRsDFSGsg2RWnpNVj3qRr
