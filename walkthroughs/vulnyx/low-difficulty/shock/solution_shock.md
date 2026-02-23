@@ -28,20 +28,22 @@ Nmap done: 1 IP address (1 host up) scanned in 124.73 seconds
 The host at 192.168.100.243 is up, with three services listening: ftp, SSH, and HTTP. All other ports are closed. FTP (port 21) is filtered by the firewall, so it is unclear whether the service is actually running.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
-└─$ nmap -n -Pn -sS -p- --min-rate 5000 192.168.100.243 
-Starting Nmap 7.95 ( https://nmap.org ) at 2026-02-07 23:34 EST
+└─$ nmap -sVC -p22,80 192.168.100.243
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-02-19 15:26 CET
 Nmap scan report for 192.168.100.243
-Host is up (0.0032s latency).
-Not shown: 65532 closed tcp ports (reset)
-PORT   STATE    SERVICE
-21/tcp filtered ftp
-22/tcp open     ssh
-80/tcp open     http
-MAC Address: 08:00:27:09:C5:80 (PCS Systemtechnik/Oracle VirtualBox virtual NIC)
+Host is up (0.00032s latency).
 
-Nmap done: 1 IP address (1 host up) scanned in 124.73 seconds
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)
+| ssh-hostkey: 
+|   2048 37:36:60:3e:26:ae:23:3f:e1:8b:5d:18:e7:a7:c7:ce (RSA)
+|   256 34:9a:57:60:7d:66:70:d5:b5:ff:47:96:e0:36:23:75 (ECDSA)
+|_  256 ae:7d:ee:fe:1d:bc:99:4d:54:45:3d:61:16:f8:6c:87 (ED25519)
+80/tcp open  http    Apache httpd 2.4.38 ((Debian))
+|_http-title: Site doesn't have a title (text/html).
+|_http-server-header: Apache/2.4.38 (Debian)
 ```
-The victim host at 192.168.1.43 is running:
+The victim host at 192.168.100.243 is running:
 - SSH for remote administration.
 - An Apache HTTP server with the default page, indicating that the web server is active but no specific application has been deployed yet.
 
