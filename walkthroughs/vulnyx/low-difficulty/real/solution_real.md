@@ -22,7 +22,7 @@ Ending arp-scan 1.10.0: 256 hosts scanned in 2.252 seconds (113.68 hosts/sec). 4
 ```
 The Real's IP address is 192.168.100.120.
 
-**Nmap**/TCP:
+**Nmap/TCP**:
 
 Use Nmap to scan the ports on the Real's IP address (192.168.100.120).
 ```bash
