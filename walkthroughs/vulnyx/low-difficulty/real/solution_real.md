@@ -106,7 +106,7 @@ This command searches the Exploit Database (EDB) for exploits related to UnrealI
 
 This is the most important find - a `backdoor` exploit in UnrealIRCd version 3.2.8.1. This version was distributed in 2009 with a `backdoor` embedded in the offical distribution. Through the exploit, we can connect to an IRC server via TCP and excecute any commnand.
 
-**Exploit features***:
+**Exploit features**:
 - Remote Code Execution (RCE) capability.
 - A command in the format `AB; <command>` is sent to the IRC server via TCP.
 - Metasploit module is available `exploit/unix/irc/unreal_ircd_3281_backdoor`.
