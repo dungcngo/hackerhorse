@@ -1,5 +1,5 @@
 # 0x13
-This write-up explains the steps taken to complete mission 0x12 on hades@hackmyvm.eu, starting from user `astraea` and escalating to `atalanta`.
+This write-up explains the steps taken to complete mission 0x13 on hades@hackmyvm.eu, starting from user `astraea` and escalating to `atalanta`.
 
 ## Mission
 This mission clue for this level was found within retrieved from the FTP server:
