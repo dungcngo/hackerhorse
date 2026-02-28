@@ -14,6 +14,6 @@ Start here:
 
 ## Method of Solving
 View the page source and look for the HTTP comment.
-![image-1](natas00/image-1.png)
+![image-1](natas/natas00/image-1.png)
 
 ***You are welcome!***
