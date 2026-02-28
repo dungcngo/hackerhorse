@@ -14,6 +14,6 @@ Start here:
 
 ## Method of Solving
 View the page source and look for the HTTP comment.
-![image-1](https://github.com/dungcngo/hackerhorse/blob/main/walkthroughs/overthewire/natas/natas00/image-1.png)
+![image-1](dungcngo/hackerhorse/walkthroughs/overthewire/natas/natas00/image-1.png)
 
 ***You are welcome!***
