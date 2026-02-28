@@ -3,7 +3,7 @@
 ## Executive Summary
 |Machine|Author|Category|Platform|
 |-------|------|--------|--------|
-|Gift   |snl   |Beginner|HackMyVM|
+|Gift   |sml   |Beginner|HackMyVM|
 
 **Summary**: Gift is a straightforward Linux machine that emphasizes the importance of not overthinking security challenges.
 
