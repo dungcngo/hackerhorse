@@ -12,4 +12,8 @@ Start here:
 - **Password**: natas0
 - **URL**: http://natas0.natas.labs.overthewire.org
 
+## Method of Solving
+View the page source and look for the HTTP comment.
+![image-1](natas00/image-1.png)
+
 ***You are welcome!***
