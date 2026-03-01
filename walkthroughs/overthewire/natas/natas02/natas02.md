@@ -7,6 +7,7 @@
 
 ## Method of Solving
 If we check the source code, we will see a link to an image file:
+
 ![image-1](https://github.com/dungcngo/hackerhorse/blob/main/walkthroughs/overthewire/natas/natas02/image-1.png)
 
 Just remove the filename and check http://natas2.natas.labs.overthewire.org/files/ to get the directory contents.
