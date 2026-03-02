@@ -16,7 +16,7 @@ We got an SQL injection, if we check the query we can see that we can easly bypa
 ```bash
 $query = "SELECT * from users where username=\"".$_REQUEST["username"]."\" and password=\"".$_REQUEST["password"]."\"";
 ```
-If we put ` OR 1=1#` into username field, we can see that we successfully take over the logic of the query and force it to return _true_ (the `#` will make sure that remaining of the query will be passed as comment):
+If we put `" OR 1=1#` into username field, we can see that we successfully take over the logic of the query and force it to return _true_ (the `#` will make sure that remaining of the query will be passed as comment):
 ```bash
 SELECT * from users where username="user" OR 1=1# " and password="pass"
 ```
