@@ -24,13 +24,13 @@ The extension of the file if modified on the client side. If we want to keep the
 
 Upload file `natas12_file.php` on the page. Use `Burpsuite` to intercept POST method  and change filename.jpg to filename.php.
 
-![image-4]((https://github.com/dungcngo/hackerhorse/blob/main/walkthroughs/overthewire/natas/natas12/image-4.png)
+![image-4](https://github.com/dungcngo/hackerhorse/blob/main/walkthroughs/overthewire/natas/natas12/image-4.png)
 
 Then, we can browser the link return by the server:
 
-![image-5]((https://github.com/dungcngo/hackerhorse/blob/main/walkthroughs/overthewire/natas/natas12/image-5.png)
+![image-5](https://github.com/dungcngo/hackerhorse/blob/main/walkthroughs/overthewire/natas/natas12/image-5.png)
 
 And get the password for next level:
 
-![image-6]((https://github.com/dungcngo/hackerhorse/blob/main/walkthroughs/overthewire/natas/natas12/image-6.png)
+![image-6](https://github.com/dungcngo/hackerhorse/blob/main/walkthroughs/overthewire/natas/natas12/image-6.png)
 ***You are welcome!***
