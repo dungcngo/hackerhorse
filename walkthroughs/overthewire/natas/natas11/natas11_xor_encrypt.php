@@ -13,3 +13,4 @@ function xor_encrypt($in) {
 }
 $cookie = "HmYkBwozJw4WNyAAFyB1VUcqOE1JZjUIBis7ABdmbU1GIjEJAyIxTRg%3D";
 echo xor_encrypt(base64_decode($cookie));
+?>
