@@ -11,3 +11,5 @@ To login to the first level use:
 - Password: `leviathan0`
 
 Data for the levels can be found in the homedirectories. You can look at `/etc/leviathan_pass` for the various level passwords.
+
+***You are welcome!***
