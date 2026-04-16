@@ -5,7 +5,7 @@ Deploy is vulnerable Linux virtual machine of low difficulty from the VulNyx pla
 
 ## Solution
 ### Enumeration
-`nmap` detects server 192.168.100.150 (internal domain: deploy.lan) running Linux (Debian 11 based OpenSSH version).
+`nmap` detects server `192.168.100.150` (internal domain: deploy.lan) running Linux (Debian 11 based OpenSSH version).
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nmap -sCV -p- -vv -T4 192.168.100.150
@@ -88,14 +88,14 @@ Nmap done: 1 IP address (1 host up) scanned in 26.27 seconds
            Raw packets sent: 65536 (2.884MB) | Rcvd: 65536 (2.621MB)
 ```
 There are 3 open ports:
-- 22/tcp: ssh - OpenSSH 8.4p1 Debian 5+debu11u1 
-- 80/tcp: http - Apache httpd 2.4.56 (Debian) - This is Apache's default page when you have not configured a virtual host or deployed any applications.
-- 8080/tcp http - Apache Tomcat - This is Apache Tomcat (popular Java server to run Java/Spring Boot web applications, JSP,...). Tomcat's default page is usually a management page or "Tomcat welcome page".
+- `22/tcp`: ssh - OpenSSH 8.4p1 Debian 5+debu11u1 
+- `80/tcp`: http - Apache httpd 2.4.56 (Debian) - This is Apache's default page when you have not configured a virtual host or deployed any applications.
+- `8080/tcp http` - Apache Tomcat - This is Apache Tomcat (popular Java server to run Java/Spring Boot web applications, JSP,...). Tomcat's default page is usually a management page or "Tomcat welcome page".
 
--> Port 8080 (Tomcat) is the most suspicious: there are often  vulnerabilities in Tomcat Manager.
+-> Port 8080 (Tomcat) is the most suspicious: there are often  vulnerabilities in **Tomcat Manager**.
 
 
-Nikto is a web server vulnerability scanner that specializes in finding common issues such as misconfiguration, default files, missing security headers, dangerous HTTP methods, default accounts, etc.
+`Nikto` is a web server vulnerability scanner that specializes in finding common issues such as misconfiguration, default files, missing security headers, dangerous HTTP methods, default accounts, etc.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nikto -C all -h 192.168.100.150:8080 
@@ -123,8 +123,9 @@ Nikto is a web server vulnerability scanner that specializes in finding common i
 + 1 host(s) tested
 ```
 This is the most dangerous discovery: **Tomcat Manager** (where applications are managed and deployed) is using the default account:
-- Username: tomcat
-- Password: s3cret
+- Username: `tomcat`
+- Password: `s3cret`
+
 This is Tomcat's classic default credential pair.
 
 **Tomcat Manager** allows users to upload WAR files (web application archive) and deploy new applications with just a few clicks.
