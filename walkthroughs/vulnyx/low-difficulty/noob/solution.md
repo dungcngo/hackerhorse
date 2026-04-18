@@ -1,0 +1,33 @@
+# VulNyx - Noob
+
+## Information
+**Noob** is a low difficulty vulnerable Linux virtual machine from the VulNyx platform, it was created by user `mow` and works correctly on VirtualBox and VMware hypervisors.
+
+## Solution
+### Enumeration
+**Nmap**
+```bash
+┌──(dungcngo㉿kali)-[/tmp]
+└─$ nmap -sVC -p- -T4 192.168.100.146     
+Starting Nmap 7.95 ( https://nmap.org ) at 2026-04-17 16:32 +07
+Nmap scan report for noob.lan (192.168.100.146)
+Host is up (0.0026s latency).
+Not shown: 65533 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)
+| ssh-hostkey: 
+|   3072 f0:e6:24:fb:9e:b0:7a:1a:bd:f7:b1:85:23:7f:b1:6f (RSA)
+|   256 99:c8:74:31:45:10:58:b0:ce:cc:63:b4:7a:82:57:3d (ECDSA)
+|_  256 60:da:3e:31:38:fa:b5:49:ab:48:c3:43:2c:9f:d1:32 (ED25519)
+80/tcp open  http    Apache httpd 2.4.56 ((Debian))
+|_http-server-header: Apache/2.4.56 (Debian)
+|_http-title: Apache2 Debian Default Page: It works
+MAC Address: 08:00:27:79:17:1C (PCS Systemtechnik/Oracle VirtualBox virtual NIC)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 56.78 seconds
+```
+
+### Shell (diego)
+### Privilege Escalation
