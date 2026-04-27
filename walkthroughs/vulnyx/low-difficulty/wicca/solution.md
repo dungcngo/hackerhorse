@@ -1,6 +1,7 @@
 # VulNyx - Wicca
 
 ## Information
+**Wicca** is a low difficulty vulnerable Linux virutal machine from the VulNyx platform, it works on correctly on VirtualBox and VMware hypervisors.
 
 ## Solution
 ### Enumeration 
