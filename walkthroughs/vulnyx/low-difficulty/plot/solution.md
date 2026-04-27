@@ -1,6 +1,7 @@
 # VulNyx - Plot
 
 ## Information
+**Plot** is a low difficulty vulnerable Linux virutal machine from the VulNyx platform, it was created by user `d4t4s3c` and works on correctly on VirtualBox and VMware hypervisors.
 
 ## Solution
 ### Enumeration
