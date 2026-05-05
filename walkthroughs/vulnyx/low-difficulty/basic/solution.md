@@ -36,7 +36,7 @@ Nmap done: 1 IP address (1 host up) scanned in 8.13 seconds
 ![web port 631](/walkthroughs/vulnyx/low-difficulty/basic/web-631.png)
 
 ### Shell (dimitri)
-![printers](/walkthroughs/vulnyx/low-difficulty/basic/printer.png)
+![printers](/walkthroughs/vulnyx/low-difficulty/basic/printers.png)
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ hydra -l dimitri -P /usr/share/wordlists/rockyou.txt ssh://192.168.11.12 -t 64
