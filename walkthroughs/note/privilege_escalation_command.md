@@ -3,8 +3,9 @@
 
 ## SUID/SGID Files
 SUID is a special flag assigned to an executable file. When a regular user runs this file, it is executed with the privileges of the file owner (usually `root`). 
-`find / -perm -4000 -type f 2>/dev/null`: Compare the found list of SUID files with `GTFOBins`
+- `find / -perm -4000 -type f 2>/dev/null`: Compare the found list of SUID files with `GTFOBins`
 
+- `find / -perm -4000 -exec ls -la {} \; 2>/dev/null`: List
 ## Cron Jobs
 `Cron jobs` are tasks that run in the background periodically according to the system's schedule (usually run with `root` privileges).
 `cat /etc/crontab` or `ls -la /etc/cron*`: 
@@ -23,3 +24,6 @@ Check the `/root/` directory to see if it's readable (usually it isn't), or look
 
 ## Linux capabilities
 `/usr/sbin/getcap -r / 2>/dev/null`: Search for all system-wide files that contain "Linux capabilities" (special permissions granted specifically to an executable file, rather than requiring full `root` privileges).
+
+## Writable Files
+`find / -writable 2>/dev/null |grep -vE "proc|sys|tmp|run|dev|home|var"`: Find all files or folders across the system that your current account has write (writable) permission to, but exclude temporary or unimportant system folders.
