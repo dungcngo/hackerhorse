@@ -27,3 +27,6 @@ Check the `/root/` directory to see if it's readable (usually it isn't), or look
 
 ## Writable Files
 `find / -writable 2>/dev/null |grep -vE "proc|sys|tmp|run|dev|home|var"`: Find all files or folders across the system that your current account has write (writable) permission to, but exclude temporary or unimportant system folders.
+
+# .py shell file
+`import os; os.system("/bin/bash")` -> shell.py
