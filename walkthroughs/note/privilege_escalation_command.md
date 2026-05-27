@@ -6,6 +6,7 @@ SUID is a special flag assigned to an executable file. When a regular user runs 
 - `find / -perm -4000 -type f 2>/dev/null`: Compare the found list of SUID files with `GTFOBins`
 
 - `find / -perm -4000 -exec ls -la {} \; 2>/dev/null`: List
+
 ## Cron Jobs
 `Cron jobs` are tasks that run in the background periodically according to the system's schedule (usually run with `root` privileges).
 `cat /etc/crontab` or `ls -la /etc/cron*`: 
